@@ -54,6 +54,7 @@ TemporaryDependencyNodeTargetIdentifier=net9.0
 /warnaserror+:NU1605,SYSLIB0011
 
 [sourceFiles]
+Core/Sprite.cs
 Game1.cs
 obj/Debug/net9.0/
  .NETCoreApp,Version=v9.0.AssemblyAttributes.cs
@@ -243,5 +244,6 @@ Program.cs
  System.Text.RegularExpressions.Generator.dll
 
 [analyzerConfigFiles]
+../.editorconfig
 <DOTNET>/sdk/10.0.203/Sdks/Microsoft.NET.Sdk/analyzers/build/config/analysislevel_9_default.globalconfig
 obj/Debug/net9.0/Pong.GeneratedMSBuildEditorConfig.editorconfig
