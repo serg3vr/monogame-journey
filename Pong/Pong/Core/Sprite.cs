@@ -11,6 +11,7 @@ public class Sprite
     public int Speed { get; set; }
     public int Width;
     public int Height;
+    public Color SpriteColor { get; set; }
 
     public Sprite(Texture2D texture, Vector2 position, int width, int height)
     {
@@ -22,6 +23,6 @@ public class Sprite
 
     public void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(Texture, new Rectangle((int)Position.X, (int)Position.Y, Width, Height), Color.White);
+        spriteBatch.Draw(Texture, new Rectangle((int)Position.X, (int)Position.Y, Width, Height), SpriteColor);
     }
 }

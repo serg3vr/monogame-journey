@@ -17,6 +17,7 @@ public class Game1 : Game
     private Texture2D _square;
 
     private Sprite _leftPaddle;
+    private Sprite _rightPaddle;
     private Sprite _ball;
 
     public Game1()
@@ -48,6 +49,15 @@ public class Game1 : Game
 
         _leftPaddle = new Sprite(_square, new Vector2(20, _screenHeight / 2), 20, 100);
         _leftPaddle.Speed = 5;
+        _leftPaddle.SpriteColor = Color.Cyan;
+
+        _rightPaddle = new Sprite(_square, new Vector2( _screenWidth - 20 * 2, _screenHeight / 2), 20, 100);
+        _rightPaddle.Speed = 5;
+        _rightPaddle.SpriteColor = Color.DarkCyan;
+
+        _ball = new Sprite(_square, new Vector2(_screenWidth / 2, _screenHeight / 2), 20, 20);
+        _ball.Speed = 10;
+        _ball.SpriteColor = Color.White;
     }
 
     protected override void Update(GameTime gameTime)
@@ -85,12 +95,11 @@ public class Game1 : Game
 
         _spriteBatch.Begin();
 
-        // _spriteBatch.Draw(_square, new Rectangle(_leftPaddle.X, _leftPaddle.Y, _leftPaddle.W, _leftPaddle.H), Color.Cyan);
         _leftPaddle.Draw(_spriteBatch);
 
-        _spriteBatch.Draw(_square, new Rectangle(_screenWidth - 20 * 2, _screenHeight / 2 - 20, 20, 100), Color.DarkCyan);
+        _rightPaddle.Draw(_spriteBatch);
 
-        _spriteBatch.Draw(_square, new Rectangle(_screenWidth / 2, _screenHeight / 2, 20, 20), Color.White);
+        _ball.Draw(_spriteBatch);
 
         _spriteBatch.End();
 
