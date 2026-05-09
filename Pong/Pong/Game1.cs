@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Pong.Core;
+using Pong.GameObjects;
 
 namespace Pong;
 
@@ -18,7 +19,7 @@ public class Game1 : Game
 
     private Sprite _leftPaddle;
     private Sprite _rightPaddle;
-    private Sprite _ball;
+    private Ball _ball;
 
     public Game1()
     {
@@ -55,9 +56,10 @@ public class Game1 : Game
         _rightPaddle.Speed = 5;
         _rightPaddle.SpriteColor = Color.DarkCyan;
 
-        _ball = new Sprite(_square, new Vector2(_screenWidth / 2, _screenHeight / 2), 20, 20);
-        _ball.Speed = 10;
+        _ball = new Ball(_square, new Vector2(_screenWidth / 2, _screenHeight / 2), 20, 20);
+        _ball.Speed = 8;
         _ball.SpriteColor = Color.White;
+        _ball.Velocity = new Vector2(_ball.Speed, _ball.Speed);
     }
 
     protected override void Update(GameTime gameTime)
@@ -82,6 +84,26 @@ public class Game1 : Game
 
         if ((_leftPaddle.Position.Y + _leftPaddle.Height) > _screenHeight) {
             _leftPaddle.Position = new Vector2(_leftPaddle.Position.X, _screenHeight - _leftPaddle.Height);
+        }
+
+        _ball.Position += _ball.Velocity;
+
+        int top = (int)_ball.Position.Y;
+        int bottom = (int)_ball.Position.Y + _ball.Height;
+        int right = (int)_ball.Position.X + _ball.Width;
+        int left = (int)_ball.Position.X;
+
+        if (top <= 0) {
+            _ball.Velocity = new Vector2(_ball.Velocity.X, _ball.Speed);
+        }
+        if (bottom >= _screenHeight) {
+            _ball.Velocity = new Vector2(_ball.Velocity.X, -_ball.Speed);
+        }
+        if (left <= 0) {
+            _ball.Velocity = new Vector2(_ball.Speed, _ball.Velocity.Y);
+        }
+        if (right >= _screenWidth) {
+            _ball.Velocity = new Vector2(-_ball.Speed, _ball.Velocity.Y);
         }
 
         base.Update(gameTime);
