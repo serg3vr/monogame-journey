@@ -146,8 +146,7 @@ public class Game1 : Game
 
         int size = _screenHeight / 20;
 
-        for (int i = 0; i <= size; i++)
-        {
+        for (int i = 0; i <= size; i++) {
             _spriteBatch.Draw(_square, new Rectangle(_screenWidth / 2, i * size, PIXEL_WIDTH / 2, PIXEL_WIDTH), new Color(100, 100, 100));
         }
 
