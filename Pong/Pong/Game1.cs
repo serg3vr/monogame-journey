@@ -29,6 +29,8 @@ public class Game1 : Game
         IsMouseVisible = true;
         _graphics.PreferredBackBufferWidth = 1280;
         _graphics.PreferredBackBufferHeight = 720;
+
+        _graphics.ApplyChanges();
     }
 
     protected override void Initialize()
@@ -141,6 +143,13 @@ public class Game1 : Game
         _rightPaddle.Draw(_spriteBatch);
 
         _ball.Draw(_spriteBatch);
+
+        int size = _screenHeight / 20;
+
+        for (int i = 0; i <= size; i++)
+        {
+            _spriteBatch.Draw(_square, new Rectangle(_screenWidth / 2, i * size, PIXEL_WIDTH / 2, PIXEL_WIDTH), new Color(100, 100, 100));
+        }
 
         _spriteBatch.End();
 
