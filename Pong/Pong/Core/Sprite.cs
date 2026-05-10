@@ -13,6 +13,12 @@ public class Sprite
     public int Height;
     public Color SpriteColor { get; set; }
 
+    public Rectangle Bounds => new Rectangle((int)Position.X, (int)Position.Y, Width, Height);
+    public int Top => (int)Position.Y;
+    public int Bottom => (int)Position.Y + Height;
+    public int Left => (int)Position.X;
+    public int Right => (int)Position.X + Width;
+
     public Sprite(Texture2D texture, Vector2 position, int width, int height)
     {
         Texture = texture;
@@ -23,6 +29,6 @@ public class Sprite
 
     public void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(Texture, new Rectangle((int)Position.X, (int)Position.Y, Width, Height), SpriteColor);
+        spriteBatch.Draw(Texture, Bounds, SpriteColor);
     }
 }

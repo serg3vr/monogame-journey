@@ -64,15 +64,15 @@ public class Game1 : Game
         _square.SetData(new[] { Color.White });
 
         _leftPaddle = new Sprite(_square, new Vector2(PIXEL_WIDTH * 2, _screenHeight / 2), PIXEL_WIDTH, 100);
-        _leftPaddle.Speed = 5;
+        _leftPaddle.Speed = 800;
         _leftPaddle.SpriteColor = Color.Cyan;
 
         _rightPaddle = new Sprite(_square, new Vector2(_screenWidth - PIXEL_WIDTH * 3, _screenHeight / 2), PIXEL_WIDTH, 100);
-        _rightPaddle.Speed = 5;
+        _rightPaddle.Speed = 400;
         _rightPaddle.SpriteColor = Color.DarkCyan;
 
         _ball = new Ball(_square, new Vector2(_screenWidth / 2, _screenHeight / 2), PIXEL_WIDTH, PIXEL_WIDTH);
-        _ball.Speed = 8;
+        _ball.Speed = 800;
         _ball.SpriteColor = Color.White;
         _ball.Velocity = new Vector2(_ball.Speed, _ball.Speed);
 
@@ -84,6 +84,7 @@ public class Game1 : Game
 
     protected override void Update(GameTime gameTime)
     {
+        float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
         KeyboardState ks = Keyboard.GetState();
 
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || ks.IsKeyDown(Keys.Escape)) {
@@ -93,9 +94,9 @@ public class Game1 : Game
         // TODO: Add your update logic here
 
         if (ks.IsKeyDown(Keys.W)) {
-            _leftPaddle.Position -= new Vector2(0, _leftPaddle.Speed);
+            _leftPaddle.Position -= new Vector2(0, _leftPaddle.Speed) * dt;
         } else if (ks.IsKeyDown(Keys.S)) {
-            _leftPaddle.Position += new Vector2(0, _leftPaddle.Speed);
+            _leftPaddle.Position += new Vector2(0, _leftPaddle.Speed) * dt;
         }
 
         if (_leftPaddle.Position.Y <= 0) {
@@ -108,9 +109,9 @@ public class Game1 : Game
 
 
         if (_ball.Position.Y < _rightPaddle.Position.Y) {
-            _rightPaddle.Position -= new Vector2(0, _rightPaddle.Speed);
+            _rightPaddle.Position -= new Vector2(0, _rightPaddle.Speed) * dt;
         } else if (_ball.Position.Y > _rightPaddle.Position.Y) {
-            _rightPaddle.Position += new Vector2(0, _rightPaddle.Speed);
+            _rightPaddle.Position += new Vector2(0, _rightPaddle.Speed) * dt;
         }
 
         if (_rightPaddle.Position.Y <= 0) {
@@ -121,7 +122,7 @@ public class Game1 : Game
             _rightPaddle.Position = new Vector2(_rightPaddle.Position.X, _screenHeight - _rightPaddle.Height);
         }
 
-        _ball.Position += _ball.Velocity;
+        _ball.Position += _ball.Velocity * dt;
 
         int top = (int)_ball.Position.Y;
         int bottom = (int)_ball.Position.Y + _ball.Height;
@@ -143,18 +144,16 @@ public class Game1 : Game
             _leftScore++;
         }
 
-        Rectangle playerRect = new Rectangle((int)_leftPaddle.Position.X, (int)_leftPaddle.Position.Y, _leftPaddle.Width, _leftPaddle.Height);
         Rectangle ballRect = new Rectangle((int)_ball.Position.X, (int)_ball.Position.Y, _ball.Width, _ball.Height);
-        Rectangle rightPaddleRect = new Rectangle((int)_rightPaddle.Position.X, (int)_rightPaddle.Position.Y, _rightPaddle.Width, _rightPaddle.Height);
 
-        if (playerRect.Intersects(ballRect)) {
-            if (ballRect.X < playerRect.X) {
+        if (_leftPaddle.Bounds.Intersects(ballRect)) {
+            if (ballRect.X < _leftPaddle.Right) {
                 _ball.Velocity = new Vector2(_ball.Speed, _ball.Velocity.Y);
             }
         }
 
-        if (rightPaddleRect.Intersects(ballRect)) {
-            if (ballRect.X > rightPaddleRect.X) {
+        if (_rightPaddle.Bounds.Intersects(ballRect)) {
+            if (ballRect.X + ballRect.Width > _rightPaddle.Left) {
                 _ball.Velocity = new Vector2(-_ball.Speed, _ball.Velocity.Y);
             }
         }
@@ -168,21 +167,21 @@ public class Game1 : Game
 
         // TODO: Add your drawing code here
 
-        _spriteBatch.Begin();
+        _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Opaque, SamplerState.PointClamp);
+
+        Color objectsColor = new Color(100, 100, 100);
+
+        int size = _screenHeight / 20;
+
+        for (int i = 0; i <= size; i++) {
+            _spriteBatch.Draw(_square, new Rectangle(_screenWidth / 2, i * size, PIXEL_WIDTH / 2, PIXEL_WIDTH), objectsColor);
+        }
 
         _leftPaddle.Draw(_spriteBatch);
 
         _rightPaddle.Draw(_spriteBatch);
 
-        _ball.Draw(_spriteBatch);
-
-        int size = _screenHeight / 20;
-
-        Color objectsColor = new Color(100, 100, 100);
-
-        for (int i = 0; i <= size; i++) {
-            _spriteBatch.Draw(_square, new Rectangle(_screenWidth / 2, i * size, PIXEL_WIDTH / 2, PIXEL_WIDTH), objectsColor);
-        }
+        _ball.Draw(_spriteBatch);        
 
         string leftText = _leftScore.ToString();
         Vector2 fontOrigin = _spriteFont.MeasureString(leftText) / 2;
