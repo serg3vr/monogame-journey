@@ -22,6 +22,13 @@ public class Game1 : Game
     private Ball _ball;
     private const int PIXEL_WIDTH = 20;
 
+    private SpriteFont _spriteFont;
+
+    private int _leftScore;
+    private Vector2 _leftScorePosition;
+    private int _rightScore;
+    private Vector2 _rightScorePosition;
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -39,6 +46,9 @@ public class Game1 : Game
 
         _screenWidth = _graphics.GraphicsDevice.Viewport.Width;
         _screenHeight = _graphics.GraphicsDevice.Viewport.Height;
+
+        _leftScore = 0;
+        _rightScore = 0;
 
         base.Initialize();
     }
@@ -65,6 +75,11 @@ public class Game1 : Game
         _ball.Speed = 8;
         _ball.SpriteColor = Color.White;
         _ball.Velocity = new Vector2(_ball.Speed, _ball.Speed);
+
+        _spriteFont = Content.Load<SpriteFont>("myfont");
+        _leftScorePosition = new Vector2(_screenWidth / 2 - PIXEL_WIDTH * 3, PIXEL_WIDTH * 3);
+        _rightScorePosition = new Vector2(_screenWidth / 2 + PIXEL_WIDTH * 3, PIXEL_WIDTH * 3);
+
     }
 
     protected override void Update(GameTime gameTime)
@@ -106,9 +121,11 @@ public class Game1 : Game
         }
         if (left <= 0) {
             _ball.Velocity = new Vector2(_ball.Speed, _ball.Velocity.Y);
+            _rightScore++;
         }
         if (right >= _screenWidth) {
             _ball.Velocity = new Vector2(-_ball.Speed, _ball.Velocity.Y);
+            _leftScore++;
         }
 
         Rectangle playerRect = new Rectangle((int)_leftPaddle.Position.X, (int)_leftPaddle.Position.Y, _leftPaddle.Width, _leftPaddle.Height);
@@ -146,9 +163,19 @@ public class Game1 : Game
 
         int size = _screenHeight / 20;
 
+        Color objectsColor = new Color(100, 100, 100);
+
         for (int i = 0; i <= size; i++) {
-            _spriteBatch.Draw(_square, new Rectangle(_screenWidth / 2, i * size, PIXEL_WIDTH / 2, PIXEL_WIDTH), new Color(100, 100, 100));
+            _spriteBatch.Draw(_square, new Rectangle(_screenWidth / 2, i * size, PIXEL_WIDTH / 2, PIXEL_WIDTH), objectsColor);
         }
+
+        string leftText = _leftScore.ToString();
+        Vector2 fontOrigin = _spriteFont.MeasureString(leftText) / 2;
+        _spriteBatch.DrawString(_spriteFont, leftText, _leftScorePosition, objectsColor, 0, fontOrigin, 5.0f, SpriteEffects.None, 0.5f);
+
+        string rightText = _rightScore.ToString();
+        Vector2 fontOriginRight = _spriteFont.MeasureString(rightText) / 2;
+        _spriteBatch.DrawString(_spriteFont, rightText, _rightScorePosition, objectsColor, 0, fontOriginRight, 5.0f, SpriteEffects.None, 0.5f);
 
         _spriteBatch.End();
 
