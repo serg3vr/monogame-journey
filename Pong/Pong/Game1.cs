@@ -106,6 +106,21 @@ public class Game1 : Game
             _leftPaddle.Position = new Vector2(_leftPaddle.Position.X, _screenHeight - _leftPaddle.Height);
         }
 
+
+        if (_ball.Position.Y < _rightPaddle.Position.Y) {
+            _rightPaddle.Position -= new Vector2(0, _rightPaddle.Speed);
+        } else if (_ball.Position.Y > _rightPaddle.Position.Y) {
+            _rightPaddle.Position += new Vector2(0, _rightPaddle.Speed);
+        }
+
+        if (_rightPaddle.Position.Y <= 0) {
+            _rightPaddle.Position = new Vector2(_rightPaddle.Position.X, 0);
+        }
+
+        if ((_rightPaddle.Position.Y + _rightPaddle.Height) > _screenHeight) {
+            _rightPaddle.Position = new Vector2(_rightPaddle.Position.X, _screenHeight - _rightPaddle.Height);
+        }
+
         _ball.Position += _ball.Velocity;
 
         int top = (int)_ball.Position.Y;
