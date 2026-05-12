@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -99,14 +100,10 @@ public class Game1 : Game
             _leftPaddle.Position += new Vector2(0, _leftPaddle.Speed) * dt;
         }
 
-        if (_leftPaddle.Position.Y <= 0) {
-            _leftPaddle.Position = new Vector2(_leftPaddle.Position.X, 0);
-        }
-
-        if ((_leftPaddle.Position.Y + _leftPaddle.Height) > _screenHeight) {
-            _leftPaddle.Position = new Vector2(_leftPaddle.Position.X, _screenHeight - _leftPaddle.Height);
-        }
-
+        _leftPaddle.Position = new Vector2(
+            _leftPaddle.Position.X,
+            MathHelper.Clamp(_leftPaddle.Position.Y, 0, _screenHeight - _leftPaddle.Height)
+        );
 
         if (_ball.Position.Y < _rightPaddle.Position.Y) {
             _rightPaddle.Position -= new Vector2(0, _rightPaddle.Speed) * dt;
@@ -114,13 +111,10 @@ public class Game1 : Game
             _rightPaddle.Position += new Vector2(0, _rightPaddle.Speed) * dt;
         }
 
-        if (_rightPaddle.Position.Y <= 0) {
-            _rightPaddle.Position = new Vector2(_rightPaddle.Position.X, 0);
-        }
-
-        if ((_rightPaddle.Position.Y + _rightPaddle.Height) > _screenHeight) {
-            _rightPaddle.Position = new Vector2(_rightPaddle.Position.X, _screenHeight - _rightPaddle.Height);
-        }
+        _rightPaddle.Position = new Vector2(
+            _rightPaddle.Position.X,
+            MathHelper.Clamp(_rightPaddle.Position.Y, 0, _screenHeight - _rightPaddle.Height)
+        );
 
         _ball.Position += _ball.Velocity * dt;
 
