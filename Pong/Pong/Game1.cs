@@ -30,6 +30,9 @@ public class Game1 : Game
     private int _rightScore;
     private Vector2 _rightScorePosition;
 
+    // private Vector2 _ballVelocity;
+    private float _ballAngle;
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -50,6 +53,8 @@ public class Game1 : Game
 
         _leftScore = 0;
         _rightScore = 0;
+
+        _ballAngle = MathHelper.ToRadians(-30);
 
         base.Initialize();
     }
@@ -73,9 +78,10 @@ public class Game1 : Game
         _rightPaddle.SpriteColor = Color.DarkCyan;
 
         _ball = new Ball(_square, new Vector2(_screenWidth / 2, _screenHeight / 2), PIXEL_WIDTH, PIXEL_WIDTH);
-        _ball.Speed = 800;
+        _ball.Speed = 400;
         _ball.SpriteColor = Color.White;
-        _ball.Velocity = new Vector2(_ball.Speed, _ball.Speed);
+        // _ball.Velocity = new Vector2(_ball.Speed, _ball.Speed);
+        _ball.Velocity = new Vector2(MathF.Cos(_ballAngle), MathF.Sin(_ballAngle)) * _ball.Speed;
 
         _spriteFont = Content.Load<SpriteFont>("myfont");
         _leftScorePosition = new Vector2(_screenWidth / 2 - PIXEL_WIDTH * 3, PIXEL_WIDTH * 3);
@@ -116,7 +122,7 @@ public class Game1 : Game
             MathHelper.Clamp(_rightPaddle.Position.Y, 0, _screenHeight - _rightPaddle.Height)
         );
 
-        _ball.Position += _ball.Velocity * dt;
+        // _ball.Position += _ball.Velocity * dt;
 
         int top = (int)_ball.Position.Y;
         int bottom = (int)_ball.Position.Y + _ball.Height;
@@ -124,17 +130,17 @@ public class Game1 : Game
         int left = (int)_ball.Position.X;
 
         if (top <= 0) {
-            _ball.Velocity = new Vector2(_ball.Velocity.X, _ball.Speed);
+            _ball.Velocity = new Vector2(_ball.Velocity.X, _ball.Velocity.Y * -1);
         }
         if (bottom >= _screenHeight) {
-            _ball.Velocity = new Vector2(_ball.Velocity.X, -_ball.Speed);
+            _ball.Velocity = new Vector2(_ball.Velocity.X, _ball.Velocity.Y * -1);
         }
         if (left <= 0) {
-            _ball.Velocity = new Vector2(_ball.Speed, _ball.Velocity.Y);
+            _ball.Velocity = new Vector2(_ball.Velocity.X * -1, _ball.Velocity.Y);
             _rightScore++;
         }
         if (right >= _screenWidth) {
-            _ball.Velocity = new Vector2(-_ball.Speed, _ball.Velocity.Y);
+            _ball.Velocity = new Vector2(_ball.Velocity.X * -1, _ball.Velocity.Y);
             _leftScore++;
         }
 
@@ -142,7 +148,21 @@ public class Game1 : Game
 
         if (_leftPaddle.Bounds.Intersects(ballRect)) {
             if (ballRect.X < _leftPaddle.Right) {
-                _ball.Velocity = new Vector2(_ball.Speed, _ball.Velocity.Y);
+                // _ball.Velocity = new Vector2(_ball.Speed, _ball.Velocity.Y);
+
+                float ballCenter = _ball.Position.Y + _ball.Height / 2;
+                float paddleCenter = _leftPaddle.Position.Y + _leftPaddle.Height / 2;
+
+                Random rnd = new Random();
+                int range2 = rnd.Next(1, 60);
+                _ballAngle = MathHelper.ToRadians(range2);
+                _ball.Velocity = new Vector2(MathF.Cos(_ballAngle), MathF.Sin(_ballAngle)) * _ball.Speed;
+
+                if (ballCenter < paddleCenter) {
+                    _ball.Velocity = new Vector2(MathF.Abs(_ball.Velocity.X), -_ball.Velocity.Y);
+                } else {
+                    _ball.Velocity = new Vector2(MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
+                }
             }
         }
 
@@ -151,6 +171,8 @@ public class Game1 : Game
                 _ball.Velocity = new Vector2(-_ball.Speed, _ball.Velocity.Y);
             }
         }
+
+        _ball.Position += _ball.Velocity * dt;
 
         base.Update(gameTime);
     }
