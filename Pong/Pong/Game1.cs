@@ -54,7 +54,7 @@ public class Game1 : Game
         _leftScore = 0;
         _rightScore = 0;
 
-        _ballAngle = MathHelper.ToRadians(-30);
+        _ballAngle = -30;
 
         base.Initialize();
     }
@@ -78,15 +78,13 @@ public class Game1 : Game
         _rightPaddle.SpriteColor = Color.DarkCyan;
 
         _ball = new Ball(_square, new Vector2(_screenWidth / 2, _screenHeight / 2), PIXEL_WIDTH, PIXEL_WIDTH);
-        _ball.Speed = 400;
+        _ball.Speed = 600;
         _ball.SpriteColor = Color.White;
-        // _ball.Velocity = new Vector2(_ball.Speed, _ball.Speed);
-        _ball.Velocity = new Vector2(MathF.Cos(_ballAngle), MathF.Sin(_ballAngle)) * _ball.Speed;
+        _ball.Velocity = new Vector2(MathF.Cos(MathHelper.ToRadians(_ballAngle)), MathF.Sin(MathHelper.ToRadians(_ballAngle))) * _ball.Speed;
 
         _spriteFont = Content.Load<SpriteFont>("myfont");
         _leftScorePosition = new Vector2(_screenWidth / 2 - PIXEL_WIDTH * 3, PIXEL_WIDTH * 3);
         _rightScorePosition = new Vector2(_screenWidth / 2 + PIXEL_WIDTH * 3, PIXEL_WIDTH * 3);
-
     }
 
     protected override void Update(GameTime gameTime)
@@ -148,27 +146,21 @@ public class Game1 : Game
 
         if (_leftPaddle.Bounds.Intersects(ballRect)) {
             if (ballRect.X < _leftPaddle.Right) {
-                // _ball.Velocity = new Vector2(_ball.Speed, _ball.Velocity.Y);
-
                 float ballCenter = _ball.Position.Y + _ball.Height / 2;
                 float paddleCenter = _leftPaddle.Position.Y + _leftPaddle.Height / 2;
 
-                Random rnd = new Random();
-                int range2 = rnd.Next(1, 60);
-                _ballAngle = MathHelper.ToRadians(range2);
-                _ball.Velocity = new Vector2(MathF.Cos(_ballAngle), MathF.Sin(_ballAngle)) * _ball.Speed;
-
-                if (ballCenter < paddleCenter) {
-                    _ball.Velocity = new Vector2(MathF.Abs(_ball.Velocity.X), -_ball.Velocity.Y);
-                } else {
-                    _ball.Velocity = new Vector2(MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
-                }
+                _ballAngle = ballCenter - paddleCenter;
+                _ball.Velocity = new Vector2(MathF.Cos(MathHelper.ToRadians(_ballAngle)), MathF.Sin(MathHelper.ToRadians(_ballAngle))) * _ball.Speed;
             }
         }
 
         if (_rightPaddle.Bounds.Intersects(ballRect)) {
-            if (ballRect.X + ballRect.Width > _rightPaddle.Left) {
-                _ball.Velocity = new Vector2(-_ball.Speed, _ball.Velocity.Y);
+            if (ballRect.X < _rightPaddle.Right) {
+                float ballCenter = _ball.Position.Y + _ball.Height / 2;
+                float paddleCenter = _rightPaddle.Position.Y + _rightPaddle.Height / 2;
+
+                _ballAngle = ballCenter - paddleCenter;
+                _ball.Velocity = new Vector2(-MathF.Cos(MathHelper.ToRadians(_ballAngle)), MathF.Sin(MathHelper.ToRadians(_ballAngle))) * _ball.Speed;
             }
         }
 
@@ -206,6 +198,12 @@ public class Game1 : Game
         string rightText = _rightScore.ToString();
         Vector2 fontOriginRight = _spriteFont.MeasureString(rightText) / 2;
         _spriteBatch.DrawString(_spriteFont, rightText, _rightScorePosition, objectsColor, 0, fontOriginRight, 5.0f, SpriteEffects.None, 0.5f);
+        
+
+        // float ballCenter = _ball.Position.Y + _ball.Height / 2;
+        // float paddleCenter = _leftPaddle.Position.Y + _leftPaddle.Height / 2;
+        // _spriteBatch.DrawString(_spriteFont, MathHelper.ToDegrees(-_ballAngle).ToString(), _rightScorePosition * 1.5f, objectsColor, 0, fontOriginRight, 5.0f, SpriteEffects.None, 0.5f);
+        // _spriteBatch.DrawString(_spriteFont, (ballCenter - paddleCenter).ToString(), _rightScorePosition * 1.5f, objectsColor, 0, fontOriginRight, 5.0f, SpriteEffects.None, 0.5f);
 
         _spriteBatch.End();
 
