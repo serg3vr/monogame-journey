@@ -9,7 +9,7 @@ using Pong.GameObjects;
 
 namespace Pong.Scenes;
 
-public class GameScene
+public class MenuScene
 {
     private GraphicsDevice _graphicsDevice;
     private SpriteBatch _spriteBatch;
@@ -38,7 +38,7 @@ public class GameScene
     private bool _isPause = false;
     private float _pauseTimer = 0;
 
-    public GameScene(GraphicsDevice graphicsDevice, ContentManager contentManager)
+    public MenuScene(GraphicsDevice graphicsDevice, ContentManager contentManager)
     {
         _graphicsDevice = graphicsDevice;
         // _spriteBatch = spriteBatch;
@@ -197,31 +197,9 @@ public class GameScene
 
         Color objectsColor = new Color(100, 100, 100);
 
-        int size = _screenHeight / 20;
-
-        for (int i = 0; i <= size; i++) {
-            _spriteBatch.Draw(_square, new Rectangle(_screenWidth / 2, i * size, PIXEL_WIDTH / 2, PIXEL_WIDTH), objectsColor);
-        }
-
-        _leftPaddle.Draw(_spriteBatch);
-
-        _rightPaddle.Draw(_spriteBatch);
-
-        _ball.Draw(_spriteBatch);        
-
-        string leftText = _leftScore.ToString();
-        Vector2 fontOrigin = _spriteFont.MeasureString(leftText) / 2;
-        _spriteBatch.DrawString(_spriteFont, leftText, _leftScorePosition, objectsColor, 0, fontOrigin, 5.0f, SpriteEffects.None, 0.5f);
-
-        string rightText = _rightScore.ToString();
+        string rightText = "Pong";
         Vector2 fontOriginRight = _spriteFont.MeasureString(rightText) / 2;
         _spriteBatch.DrawString(_spriteFont, rightText, _rightScorePosition, objectsColor, 0, fontOriginRight, 5.0f, SpriteEffects.None, 0.5f);
-        
-
-        // float ballCenter = _ball.Position.Y + _ball.Height / 2;
-        // float paddleCenter = _leftPaddle.Position.Y + _leftPaddle.Height / 2;
-        // _spriteBatch.DrawString(_spriteFont, MathHelper.ToDegrees(-_ballAngle).ToString(), _rightScorePosition * 1.5f, objectsColor, 0, fontOriginRight, 5.0f, SpriteEffects.None, 0.5f);
-        // _spriteBatch.DrawString(_spriteFont, (ballCenter - paddleCenter).ToString(), _rightScorePosition * 1.5f, objectsColor, 0, fontOriginRight, 5.0f, SpriteEffects.None, 0.5f);
 
         _spriteBatch.End();
 
