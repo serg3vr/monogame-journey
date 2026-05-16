@@ -33,6 +33,9 @@ public class Game1 : Game
     // private Vector2 _ballVelocity;
     private float _ballAngle;
 
+    private bool _isPause = false;
+    private float _pauseTimer = 0;
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -95,6 +98,16 @@ public class Game1 : Game
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || ks.IsKeyDown(Keys.Escape)) {
             Exit();
         }
+        
+        if (_isPause) {
+            _pauseTimer += dt;
+
+            if (_pauseTimer >= 1) {
+                _isPause = false;
+                _pauseTimer = 0;
+            }
+            return;
+        }
 
         // TODO: Add your update logic here
 
@@ -136,10 +149,14 @@ public class Game1 : Game
         if (left <= 0) {
             _ball.Velocity = new Vector2(_ball.Velocity.X * -1, _ball.Velocity.Y);
             _rightScore++;
+            _isPause = true;
+            _ball.Position = new Vector2(_screenWidth / 2, _screenHeight / 2);
         }
         if (right >= _screenWidth) {
             _ball.Velocity = new Vector2(_ball.Velocity.X * -1, _ball.Velocity.Y);
             _leftScore++;
+            _isPause = true;
+            _ball.Position = new Vector2(_screenWidth / 2, _screenHeight / 2);
         }
 
         Rectangle ballRect = new Rectangle((int)_ball.Position.X, (int)_ball.Position.Y, _ball.Width, _ball.Height);
