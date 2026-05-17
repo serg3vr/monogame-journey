@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Pong.Core;
+using Pong.Core.UI;
 using Pong.GameObjects;
 
 namespace Pong.Scenes;
@@ -26,6 +27,7 @@ public class MenuScene
     private const int PIXEL_WIDTH = 20;
 
     private SpriteFont _spriteFont;
+    private SpriteFont _uiFont;
 
     private int _leftScore;
     private Vector2 _leftScorePosition;
@@ -37,6 +39,9 @@ public class MenuScene
 
     private bool _isPause = false;
     private float _pauseTimer = 0;
+
+    private Button _button;
+    private Texture2D _buttonTexture;
 
     public MenuScene(GraphicsDevice graphicsDevice, ContentManager contentManager)
     {
@@ -64,31 +69,26 @@ public class MenuScene
     {
         _spriteBatch = spriteBatch;
 
-        // _screenWidth = _graphicsDevice.Viewport.Width;
-        // _screenHeight = _graphicsDevice.Viewport.Height;
-
         // TODO: use this.Content to load your game content here
 
-        _square = new Texture2D(_graphicsDevice, 1, 1);
-        // _square.SetData(Enumerable.Repeat(Color.White, 400).ToArray());
-        _square.SetData(new[] { Color.White });
+        // _square = new Texture2D(_graphicsDevice, 1, 1);
+        // _square.SetData(new[] { Color.White });
 
-        _leftPaddle = new Sprite(_square, new Vector2(PIXEL_WIDTH * 2, _screenHeight / 2), PIXEL_WIDTH, 100);
-        _leftPaddle.Speed = 800;
-        _leftPaddle.SpriteColor = Color.Cyan;
-
-        _rightPaddle = new Sprite(_square, new Vector2(_screenWidth - PIXEL_WIDTH * 3, _screenHeight / 2), PIXEL_WIDTH, 100);
-        _rightPaddle.Speed = 400;
-        _rightPaddle.SpriteColor = Color.DarkCyan;
-
-        _ball = new Ball(_square, new Vector2(_screenWidth / 2, _screenHeight / 2), PIXEL_WIDTH, PIXEL_WIDTH);
-        _ball.Speed = 600;
-        _ball.SpriteColor = Color.White;
-        _ball.Velocity = new Vector2(MathF.Cos(MathHelper.ToRadians(_ballAngle)), MathF.Sin(MathHelper.ToRadians(_ballAngle))) * _ball.Speed;
+        _square = Button.CreateRoundedRectTexture(_graphicsDevice, 200, 60, 10);
 
         _spriteFont = _contentManager.Load<SpriteFont>("myfont");
-        _leftScorePosition = new Vector2(_screenWidth / 2 - PIXEL_WIDTH * 3, PIXEL_WIDTH * 3);
+        _uiFont = _contentManager.Load<SpriteFont>("myuifont");
+        // _leftScorePosition = new Vector2(_screenWidth / 2 - PIXEL_WIDTH * 3, PIXEL_WIDTH * 3);
         _rightScorePosition = new Vector2(_screenWidth / 2 + PIXEL_WIDTH * 3, PIXEL_WIDTH * 3);
+
+        _button = new Button(_square, _uiFont, new Rectangle(_screenWidth / 2, _screenHeight / 2, 200, 60), "START");
+
+        _button.OnClick = () =>
+        {
+            // gameStarted = true;
+            // throw new Exception();
+            // System.Diagnostics.Debug.WriteLine("Message");
+        };
     }
 
     public void Update(GameTime gameTime)
@@ -112,79 +112,8 @@ public class MenuScene
 
         // TODO: Add your update logic here
 
-        if (ks.IsKeyDown(Keys.W)) {
-            _leftPaddle.Position -= new Vector2(0, _leftPaddle.Speed) * dt;
-        } else if (ks.IsKeyDown(Keys.S)) {
-            _leftPaddle.Position += new Vector2(0, _leftPaddle.Speed) * dt;
-        }
-
-        _leftPaddle.Position = new Vector2(
-            _leftPaddle.Position.X,
-            MathHelper.Clamp(_leftPaddle.Position.Y, 0, _screenHeight - _leftPaddle.Height)
-        );
-
-        if (_ball.Position.Y < _rightPaddle.Position.Y) {
-            _rightPaddle.Position -= new Vector2(0, _rightPaddle.Speed) * dt;
-        } else if (_ball.Position.Y > _rightPaddle.Position.Y) {
-            _rightPaddle.Position += new Vector2(0, _rightPaddle.Speed) * dt;
-        }
-
-        _rightPaddle.Position = new Vector2(
-            _rightPaddle.Position.X,
-            MathHelper.Clamp(_rightPaddle.Position.Y, 0, _screenHeight - _rightPaddle.Height)
-        );
-
-        // _ball.Position += _ball.Velocity * dt;
-
-        int top = (int)_ball.Position.Y;
-        int bottom = (int)_ball.Position.Y + _ball.Height;
-        int right = (int)_ball.Position.X + _ball.Width;
-        int left = (int)_ball.Position.X;
-
-        if (top <= 0) {
-            _ball.Velocity = new Vector2(_ball.Velocity.X, _ball.Velocity.Y * -1);
-        }
-        if (bottom >= _screenHeight) {
-            _ball.Velocity = new Vector2(_ball.Velocity.X, _ball.Velocity.Y * -1);
-        }
-        if (left <= 0) {
-            _ball.Velocity = new Vector2(_ball.Velocity.X * -1, _ball.Velocity.Y);
-            _rightScore++;
-            _isPause = true;
-            _ball.Position = new Vector2(_screenWidth / 2, _screenHeight / 2);
-        }
-        if (right >= _screenWidth) {
-            _ball.Velocity = new Vector2(_ball.Velocity.X * -1, _ball.Velocity.Y);
-            _leftScore++;
-            _isPause = true;
-            _ball.Position = new Vector2(_screenWidth / 2, _screenHeight / 2);
-        }
-
-        Rectangle ballRect = new Rectangle((int)_ball.Position.X, (int)_ball.Position.Y, _ball.Width, _ball.Height);
-
-        if (_leftPaddle.Bounds.Intersects(ballRect)) {
-            if (ballRect.X < _leftPaddle.Right) {
-                float ballCenter = _ball.Position.Y + _ball.Height / 2;
-                float paddleCenter = _leftPaddle.Position.Y + _leftPaddle.Height / 2;
-
-                _ballAngle = ballCenter - paddleCenter;
-                _ball.Velocity = new Vector2(MathF.Cos(MathHelper.ToRadians(_ballAngle)), MathF.Sin(MathHelper.ToRadians(_ballAngle))) * _ball.Speed;
-            }
-        }
-
-        if (_rightPaddle.Bounds.Intersects(ballRect)) {
-            if (ballRect.X < _rightPaddle.Right) {
-                float ballCenter = _ball.Position.Y + _ball.Height / 2;
-                float paddleCenter = _rightPaddle.Position.Y + _rightPaddle.Height / 2;
-
-                _ballAngle = ballCenter - paddleCenter;
-                _ball.Velocity = new Vector2(-MathF.Cos(MathHelper.ToRadians(_ballAngle)), MathF.Sin(MathHelper.ToRadians(_ballAngle))) * _ball.Speed;
-            }
-        }
-
-        _ball.Position += _ball.Velocity * dt;
-
         // base.Update(gameTime);
+        _button.Update();
     }
 
     public void Draw(GameTime gameTime)
@@ -201,6 +130,7 @@ public class MenuScene
         Vector2 fontOriginRight = _spriteFont.MeasureString(rightText) / 2;
         _spriteBatch.DrawString(_spriteFont, rightText, _rightScorePosition, objectsColor, 0, fontOriginRight, 5.0f, SpriteEffects.None, 0.5f);
 
+        _button.Draw(_spriteBatch);
         _spriteBatch.End();
 
         // base.Draw(gameTime);
