@@ -1,13 +1,9 @@
-﻿using System;
-using System.Linq;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Pong.Core;
 using Pong.Core.Scenes;
 using Pong.Core.UI;
-using Pong.GameObjects;
 using Pong.Scenes;
 
 public class MenuScene : Scene

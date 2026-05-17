@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -29,7 +28,6 @@ public class GameScene : Scene
     private int _rightScore;
     private Vector2 _rightScorePosition;
 
-    // private Vector2 _ballVelocity;
     private float _ballAngle;
 
     private bool _isPause = false;
