@@ -139,31 +139,21 @@ public class GameScene : Scene
             _ball.Position = new Vector2(_screenWidth / 2, _screenHeight / 2);
         }
 
-        Rectangle ballRect = new Rectangle((int)_ball.Position.X, (int)_ball.Position.Y, _ball.Width, _ball.Height);
-
-        if (_leftPaddle.Bounds.Intersects(ballRect)) {
-            if (ballRect.X < _leftPaddle.Right) {
-                float ballCenter = _ball.Position.Y + _ball.Height / 2;
-                float paddleCenter = _leftPaddle.Position.Y + _leftPaddle.Height / 2;
-
-                // _ballAngle = ballCenter - paddleCenter;
-                float normalizedDis = (ballCenter - paddleCenter) / _leftPaddle.Height / 2;
+        if (_leftPaddle.Bounds.Intersects(_ball.Bounds)) {
+            if (_ball.Position.X < _leftPaddle.Right) {
+                float normalizedDis = (_ball.Bounds.Center.Y - _leftPaddle.Bounds.Center.Y) / (_leftPaddle.Height / 2f);
                 float angleInRad = normalizedDis * MathHelper.ToRadians(60f);
-                // _ball.Velocity = new Vector2(MathF.Cos(MathHelper.ToRadians(_ballAngle)), MathF.Sin(MathHelper.ToRadians(_ballAngle))) * _ball.Speed;
-                _ball.Velocity = new Vector2(MathF.Cos(angleInRad), MathF.Sin(angleInRad)) * _ball.Speed;
+                Vector2 dir = new Vector2(MathF.Cos(angleInRad), MathF.Sin(angleInRad));
+                _ball.Velocity = dir * _ball.Speed;
             }
         }
 
-        if (_rightPaddle.Bounds.Intersects(ballRect)) {
-            if (ballRect.X < _rightPaddle.Right) {
-                float ballCenter = _ball.Position.Y + _ball.Height / 2;
-                float paddleCenter = _rightPaddle.Position.Y + _rightPaddle.Height / 2;
-
-                // _ballAngle = ballCenter - paddleCenter;
-                float normalizedDis = (ballCenter - paddleCenter) / (_leftPaddle.Height / 2f);
+        if (_rightPaddle.Bounds.Intersects(_ball.Bounds)) {
+            if (_ball.Position.X < _rightPaddle.Right) {
+                float normalizedDis = (_ball.Bounds.Center.Y - _rightPaddle.Bounds.Center.Y) / (_rightPaddle.Height / 2f);
                 float angleInRad = normalizedDis * MathHelper.ToRadians(60f);
-                // _ball.Velocity = new Vector2(-MathF.Cos(MathHelper.ToRadians(_ballAngle)), MathF.Sin(MathHelper.ToRadians(_ballAngle))) * _ball.Speed;
-                _ball.Velocity = new Vector2(-MathF.Cos(angleInRad), MathF.Sin(angleInRad)) * _ball.Speed;
+                Vector2 dir = new Vector2(-MathF.Cos(angleInRad), MathF.Sin(angleInRad));
+                _ball.Velocity = dir * _ball.Speed;
             }
         }
 
