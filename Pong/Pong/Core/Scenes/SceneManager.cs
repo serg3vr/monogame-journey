@@ -4,6 +4,8 @@ namespace Pong.Core.Scenes;
 
 public class SceneManager
 {
+    public bool WantsToExit { get; private set; }
+
     public Scene CurrentScene { get; private set; }
 
     public void ChangeScene(Scene newScene)
@@ -23,5 +25,10 @@ public class SceneManager
     public void Draw(GameTime gameTime)
     {
         CurrentScene?.Draw(gameTime);
+    }
+
+    public void Exit()
+    {
+        WantsToExit = true;
     }
 }
