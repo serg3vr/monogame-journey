@@ -33,6 +33,8 @@ public class GameScene : Scene
     private bool _isPause = false;
     private float _pauseTimer = 0;
 
+    private float _leftPaddleMovementAccumulation;
+
     public GameScene(
         ContentManager content,
         GraphicsDevice graphicsDevice,
@@ -65,11 +67,21 @@ public class GameScene : Scene
         _ball = new Ball(_square, new Vector2(_screenWidth / 2, _screenHeight / 2), PIXEL_WIDTH, PIXEL_WIDTH);
         _ball.Speed = 600;
         _ball.SpriteColor = Color.White;
-        _ball.Velocity = new Vector2(MathF.Cos(MathHelper.ToRadians(_ballAngle)), MathF.Sin(MathHelper.ToRadians(_ballAngle))) * _ball.Speed;
+        
+        ResetBall();
 
         _spriteFont = ContentManager.Load<SpriteFont>("myfont");
         _leftScorePosition = new Vector2(_screenWidth / 2 - PIXEL_WIDTH * 3, PIXEL_WIDTH * 3);
         _rightScorePosition = new Vector2(_screenWidth / 2 + PIXEL_WIDTH * 3, PIXEL_WIDTH * 3);
+    }
+
+    private void ResetBall(float right = 1)
+    {
+        _ball.Position = new Vector2(_screenWidth / 2, _screenHeight / 2);
+        _ball.Velocity = new Vector2(
+            MathF.Cos(MathHelper.ToRadians(_ballAngle)) * right, 
+            MathF.Sin(MathHelper.ToRadians(_ballAngle))
+        ) * _ball.Speed;
     }
 
     public override void Update(GameTime gameTime)
@@ -93,9 +105,17 @@ public class GameScene : Scene
 
         if (ks.IsKeyDown(Keys.W)) {
             _leftPaddle.Position -= new Vector2(0, _leftPaddle.Speed) * dt;
+
+            _leftPaddleMovementAccumulation += dt;
         } else if (ks.IsKeyDown(Keys.S)) {
             _leftPaddle.Position += new Vector2(0, _leftPaddle.Speed) * dt;
+
+            _leftPaddleMovementAccumulation += dt;
+        } else {
+            _leftPaddleMovementAccumulation = 0f;
         }
+
+        _leftPaddleMovementAccumulation = MathHelper.Clamp(_leftPaddleMovementAccumulation, 0, 1);
 
         _leftPaddle.Position = new Vector2(
             _leftPaddle.Position.X,
@@ -127,24 +147,32 @@ public class GameScene : Scene
             _ball.Position = new Vector2(_ball.Position.X, _screenHeight - _ball.Height);
         }
         if (left <= 0) {
-            _ball.Velocity = new Vector2(_ball.Velocity.X * -1, _ball.Velocity.Y);
             _rightScore++;
             _isPause = true;
-            _ball.Position = new Vector2(_screenWidth / 2, _screenHeight / 2);
+            ResetBall(-1f);
         }
         if (right >= _screenWidth) {
-            _ball.Velocity = new Vector2(_ball.Velocity.X * -1, _ball.Velocity.Y);
             _leftScore++;
             _isPause = true;
-            _ball.Position = new Vector2(_screenWidth / 2, _screenHeight / 2);
+            ResetBall(1f);
         }
 
         if (_leftPaddle.Bounds.Intersects(_ball.Bounds)) {
-            if (_ball.Position.X < _leftPaddle.Right) {
-                float normalizedDis = (_ball.Bounds.Center.Y - _leftPaddle.Bounds.Center.Y) / (_leftPaddle.Height / 2f);
-                float angleInRad = normalizedDis * MathHelper.ToRadians(60f);
+            var leftPaddleIsMoving = ks.IsKeyDown(Keys.W) || ks.IsKeyDown(Keys.S);
+
+            if (leftPaddleIsMoving) {
+                float normalizedDis = MathF.Abs((_ball.Bounds.Center.Y - _leftPaddle.Bounds.Center.Y) / (_leftPaddle.Height / 2f));
+                if (ks.IsKeyDown(Keys.W)) {
+                    normalizedDis = -normalizedDis;
+                }
+
+                float angleInRad = normalizedDis * MathHelper.ToRadians(60f + (7.5f * 1f + _leftPaddleMovementAccumulation)); // Max 75f
                 Vector2 dir = new Vector2(MathF.Cos(angleInRad), MathF.Sin(angleInRad));
-                _ball.Velocity = dir * _ball.Speed;
+
+                // float accelerationFactor = 0f;
+                _ball.Velocity = dir * _ball.Speed * (1f + _leftPaddleMovementAccumulation);
+            } else {
+                _ball.Velocity = new Vector2(_ball.Velocity.X * -1, _ball.Velocity.Y);
             }
         }
 
