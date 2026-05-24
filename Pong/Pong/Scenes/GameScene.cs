@@ -28,12 +28,11 @@ public class GameScene : Scene
     private int _rightScore;
     private Vector2 _rightScorePosition;
 
-    private float _ballAngle;
-
     private bool _isPause = false;
     private float _pauseTimer = 0;
 
     private float _leftPaddleMovementAccumulation;
+    private const int SPEED_INCREMENT = 20; // 20 pixels per second
 
     public GameScene(
         ContentManager content,
@@ -65,7 +64,6 @@ public class GameScene : Scene
         _rightPaddle.SpriteColor = Color.DarkCyan;
 
         _ball = new Ball(_square, new Vector2(_screenWidth / 2, _screenHeight / 2), PIXEL_WIDTH, PIXEL_WIDTH);
-        _ball.Speed = 600;
         _ball.SpriteColor = Color.White;
         
         ResetBall();
@@ -77,11 +75,9 @@ public class GameScene : Scene
 
     private void ResetBall(float right = 1)
     {
+        _ball.Speed = 600;
         _ball.Position = new Vector2(_screenWidth / 2, _screenHeight / 2);
-        _ball.Velocity = new Vector2(
-            MathF.Cos(MathHelper.ToRadians(_ballAngle)) * right, 
-            MathF.Sin(MathHelper.ToRadians(_ballAngle))
-        ) * _ball.Speed;
+        _ball.Velocity = new Vector2(1f * right, 0f) * _ball.Speed;
     }
 
     public override void Update(GameTime gameTime)
@@ -158,6 +154,7 @@ public class GameScene : Scene
         }
 
         if (_leftPaddle.Bounds.Intersects(_ball.Bounds)) {
+            _ball.Speed += SPEED_INCREMENT;
             var leftPaddleIsMoving = ks.IsKeyDown(Keys.W) || ks.IsKeyDown(Keys.S);
 
             if (leftPaddleIsMoving) {
@@ -169,7 +166,6 @@ public class GameScene : Scene
                 float angleInRad = normalizedDis * MathHelper.ToRadians(60f + (7.5f * 1f + _leftPaddleMovementAccumulation)); // Max 75f
                 Vector2 dir = new Vector2(MathF.Cos(angleInRad), MathF.Sin(angleInRad));
 
-                // float accelerationFactor = 0f;
                 _ball.Velocity = dir * _ball.Speed * (1f + _leftPaddleMovementAccumulation);
             } else {
                 _ball.Velocity = new Vector2(_ball.Velocity.X * -1, _ball.Velocity.Y);
@@ -177,12 +173,12 @@ public class GameScene : Scene
         }
 
         if (_rightPaddle.Bounds.Intersects(_ball.Bounds)) {
-            if (_ball.Position.X < _rightPaddle.Right) {
-                float normalizedDis = (_ball.Bounds.Center.Y - _rightPaddle.Bounds.Center.Y) / (_rightPaddle.Height / 2f);
-                float angleInRad = normalizedDis * MathHelper.ToRadians(60f);
-                Vector2 dir = new Vector2(-MathF.Cos(angleInRad), MathF.Sin(angleInRad));
-                _ball.Velocity = dir * _ball.Speed;
-            }
+            _ball.Speed += SPEED_INCREMENT;
+            
+            float normalizedDis = (_ball.Bounds.Center.Y - _rightPaddle.Bounds.Center.Y) / (_rightPaddle.Height / 2f);
+            float angleInRad = normalizedDis * MathHelper.ToRadians(60f);
+            Vector2 dir = new Vector2(-MathF.Cos(angleInRad), MathF.Sin(angleInRad));
+            _ball.Velocity = dir * _ball.Speed;
         }
 
         _ball.Position += _ball.Velocity * dt;
@@ -190,8 +186,6 @@ public class GameScene : Scene
 
     public override void Draw(GameTime gameTime)
     {
-        // SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Opaque, SamplerState.PointClamp);
-        // SpriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp);
         SpriteBatch.Begin();
 
         Color objectsColor = new Color(100, 100, 100);
