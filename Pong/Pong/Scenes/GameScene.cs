@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Pong.Core;
 using Pong.Core.Scenes;
+using Pong.Core.UI;
 using Pong.GameObjects;
 
 namespace Pong.Scenes;
@@ -29,10 +30,16 @@ public class GameScene : Scene
     private Vector2 _rightScorePosition;
 
     private bool _isPause = false;
-    private float _pauseTimer = 0;
 
     private float _leftPaddleMovementAccumulation;
     private const int SPEED_INCREMENT = 20; // 20 pixels per second
+
+    private Panel _panel;
+    private Button _resumeButton;
+    private Button _backToMenuButton;
+
+
+    private KeyboardState _previousKeyboardState;
 
     public GameScene(
         ContentManager content,
@@ -71,6 +78,21 @@ public class GameScene : Scene
         _spriteFont = ContentManager.Load<SpriteFont>("myfont");
         _leftScorePosition = new Vector2(_screenWidth / 2 - PIXEL_WIDTH * 3, PIXEL_WIDTH * 3);
         _rightScorePosition = new Vector2(_screenWidth / 2 + PIXEL_WIDTH * 3, PIXEL_WIDTH * 3);
+
+        _panel = new Panel(_square, _spriteFont, new Rectangle(_screenWidth / 2 - 200, 150, 400, 500));
+
+        _resumeButton = new Button(_square, _spriteFont, new Rectangle(_screenWidth / 2 - 100, _screenHeight / 2, 200, 60), "RESUME");
+        _resumeButton.OnClick = () => {
+            _isPause = !_isPause;
+        };
+
+        _backToMenuButton = new Button(_square, _spriteFont, new Rectangle(_screenWidth / 2 - 100, _screenHeight / 2 + 70, 200, 60), "BACK TO MENU");
+        _backToMenuButton.OnClick = () =>
+        {
+            SceneManager.ChangeScene(
+                new MenuScene(ContentManager, GraphicsDevice, SpriteBatch, SceneManager)
+            );
+        };
     }
 
     private void ResetBall(float right = 1)
@@ -85,17 +107,15 @@ public class GameScene : Scene
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
         KeyboardState ks = Keyboard.GetState();
 
-        // if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || ks.IsKeyDown(Keys.Escape)) {
-        //     Exit();
-        // }
+        if (ks.IsKeyDown(Keys.Enter) && _previousKeyboardState.IsKeyUp(Keys.Enter)) {
+            _isPause = !_isPause;
+        }
+
+        _previousKeyboardState = ks;
         
         if (_isPause) {
-            _pauseTimer += dt;
-
-            if (_pauseTimer >= 1) {
-                _isPause = false;
-                _pauseTimer = 0;
-            }
+            _resumeButton.Update();
+            _backToMenuButton.Update();
             return;
         }
 
@@ -144,12 +164,10 @@ public class GameScene : Scene
         }
         if (left <= 0) {
             _rightScore++;
-            _isPause = true;
             ResetBall(-1f);
         }
         if (right >= _screenWidth) {
             _leftScore++;
-            _isPause = true;
             ResetBall(1f);
         }
 
@@ -209,6 +227,12 @@ public class GameScene : Scene
         string rightText = _rightScore.ToString();
         Vector2 fontOriginRight = _spriteFont.MeasureString(rightText) / 2;
         SpriteBatch.DrawString(_spriteFont, rightText, _rightScorePosition, objectsColor, 0, fontOriginRight, 5.0f, SpriteEffects.None, 0.5f);
+
+        if (_isPause) {
+            _panel.Draw(SpriteBatch);
+            _resumeButton.Draw(SpriteBatch);
+            _backToMenuButton.Draw(SpriteBatch);
+        }
 
         SpriteBatch.End();
     }
