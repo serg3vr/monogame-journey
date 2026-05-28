@@ -104,7 +104,7 @@ public class MenuScene : Scene
 
         string rightText = "Pong";
         Vector2 fontOriginRight = _spriteFont.MeasureString(rightText) / 2;
-        SpriteBatch.DrawString(_spriteFont, rightText, _rightScorePosition, objectsColor, 0, fontOriginRight, 5.0f, SpriteEffects.None, 0.5f);
+        SpriteBatch.DrawString(_spriteFont, rightText, _rightScorePosition, objectsColor, 0, fontOriginRight, 3.0f, SpriteEffects.None, 0.5f);
 
         _panel.Draw(SpriteBatch);
         

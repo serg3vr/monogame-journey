@@ -222,11 +222,11 @@ public class GameScene : Scene
 
         string leftText = _leftScore.ToString();
         Vector2 fontOrigin = _spriteFont.MeasureString(leftText) / 2;
-        SpriteBatch.DrawString(_spriteFont, leftText, _leftScorePosition, objectsColor, 0, fontOrigin, 5.0f, SpriteEffects.None, 0.5f);
+        SpriteBatch.DrawString(_spriteFont, leftText, _leftScorePosition, objectsColor, 0, fontOrigin, 3.0f, SpriteEffects.None, 0.5f);
 
         string rightText = _rightScore.ToString();
         Vector2 fontOriginRight = _spriteFont.MeasureString(rightText) / 2;
-        SpriteBatch.DrawString(_spriteFont, rightText, _rightScorePosition, objectsColor, 0, fontOriginRight, 5.0f, SpriteEffects.None, 0.5f);
+        SpriteBatch.DrawString(_spriteFont, rightText, _rightScorePosition, objectsColor, 0, fontOriginRight, 3.0f, SpriteEffects.None, 0.5f);
 
         if (_isPause) {
             _panel.Draw(SpriteBatch);
