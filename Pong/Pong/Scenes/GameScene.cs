@@ -30,6 +30,8 @@ public class GameScene : Scene
     private Vector2 _rightScorePosition;
 
     private bool _isPause = false;
+    private bool _isGameOver = false;
+    private string _gameOverText;
 
     private float _leftPaddleMovementAccumulation;
     private const int SPEED_INCREMENT = 20; // 20 pixels per second
@@ -38,6 +40,9 @@ public class GameScene : Scene
     private Button _resumeButton;
     private Button _backToMenuButton;
 
+    private Panel _gameOverPanel;
+    private Button _retryButton;
+    private Button _gameOverBackToMenuButton;
 
     private KeyboardState _previousKeyboardState;
 
@@ -72,7 +77,7 @@ public class GameScene : Scene
 
         _ball = new Ball(_square, new Vector2(_screenWidth / 2, _screenHeight / 2), PIXEL_WIDTH, PIXEL_WIDTH);
         _ball.SpriteColor = Color.White;
-        
+
         ResetBall();
 
         _spriteFont = ContentManager.Load<SpriteFont>("myfont");
@@ -87,12 +92,33 @@ public class GameScene : Scene
         };
 
         _backToMenuButton = new Button(_square, _spriteFont, new Rectangle(_screenWidth / 2 - 100, _screenHeight / 2 + 70, 200, 60), "BACK TO MENU");
-        _backToMenuButton.OnClick = () =>
-        {
+        _backToMenuButton.OnClick = () => {
             SceneManager.ChangeScene(
                 new MenuScene(ContentManager, GraphicsDevice, SpriteBatch, SceneManager)
             );
         };
+
+        _gameOverPanel = new Panel(_square, _spriteFont, new Rectangle(_screenWidth / 2 - 200, 150, 400, 500));
+
+        _retryButton = new Button(_square, _spriteFont, new Rectangle(_screenWidth / 2 - 100, _screenHeight / 2 + 20, 200, 60), "RETRY");
+        _retryButton.OnClick = () => {
+            ResetGame();
+        };
+
+        _gameOverBackToMenuButton = new Button(_square, _spriteFont, new Rectangle(_screenWidth / 2 - 100, _screenHeight / 2 + 90, 200, 60), "BACK TO MENU");
+        _gameOverBackToMenuButton.OnClick = () => {
+            SceneManager.ChangeScene(
+                new MenuScene(ContentManager, GraphicsDevice, SpriteBatch, SceneManager)
+            );
+        };
+    }
+
+    private void ResetGame()
+    {
+        _leftScore = 0;
+        _rightScore = 0;
+        _isGameOver = false;
+        ResetBall(1f);
     }
 
     private void ResetBall(float right = 1)
@@ -112,7 +138,13 @@ public class GameScene : Scene
         }
 
         _previousKeyboardState = ks;
-        
+
+        if (_isGameOver) {
+            _retryButton.Update();
+            _gameOverBackToMenuButton.Update();
+            return;
+        }
+
         if (_isPause) {
             _resumeButton.Update();
             _backToMenuButton.Update();
@@ -164,11 +196,23 @@ public class GameScene : Scene
         }
         if (left <= 0) {
             _rightScore++;
-            ResetBall(-1f);
+
+            if (_rightScore >= 10) {
+                _isGameOver = true;
+                _gameOverText = "YOU LOSE";
+            } else {
+                ResetBall(-1f);
+            }
         }
         if (right >= _screenWidth) {
             _leftScore++;
-            ResetBall(1f);
+
+            if (_leftScore >= 10) {
+                _isGameOver = true;
+                _gameOverText = "YOU WON";
+            } else {
+                ResetBall(1f);
+            }
         }
 
         if (_leftPaddle.Bounds.Intersects(_ball.Bounds)) {
@@ -192,7 +236,7 @@ public class GameScene : Scene
 
         if (_rightPaddle.Bounds.Intersects(_ball.Bounds)) {
             _ball.Speed += SPEED_INCREMENT;
-            
+
             float normalizedDis = (_ball.Bounds.Center.Y - _rightPaddle.Bounds.Center.Y) / (_rightPaddle.Height / 2f);
             float angleInRad = normalizedDis * MathHelper.ToRadians(60f);
             Vector2 dir = new Vector2(-MathF.Cos(angleInRad), MathF.Sin(angleInRad));
@@ -218,7 +262,7 @@ public class GameScene : Scene
 
         _rightPaddle.Draw(SpriteBatch);
 
-        _ball.Draw(SpriteBatch);        
+        _ball.Draw(SpriteBatch);
 
         string leftText = _leftScore.ToString();
         Vector2 fontOrigin = _spriteFont.MeasureString(leftText) / 2;
@@ -227,6 +271,20 @@ public class GameScene : Scene
         string rightText = _rightScore.ToString();
         Vector2 fontOriginRight = _spriteFont.MeasureString(rightText) / 2;
         SpriteBatch.DrawString(_spriteFont, rightText, _rightScorePosition, objectsColor, 0, fontOriginRight, 3.0f, SpriteEffects.None, 0.5f);
+
+        if (_isGameOver) {
+            _gameOverPanel.Draw(SpriteBatch);
+
+            Vector2 textSize = _spriteFont.MeasureString(_gameOverText);
+            Vector2 textPosition = new Vector2(
+                _screenWidth / 2 - textSize.X / 2,
+                200
+            );
+            SpriteBatch.DrawString(_spriteFont, _gameOverText, textPosition, Color.White, 0, Vector2.Zero, 2.0f, SpriteEffects.None, 0.5f);
+
+            _retryButton.Draw(SpriteBatch);
+            _gameOverBackToMenuButton.Draw(SpriteBatch);
+        }
 
         if (_isPause) {
             _panel.Draw(SpriteBatch);
