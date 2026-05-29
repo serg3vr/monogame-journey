@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework;
 
-namespace Pong.Core.Scenes;
+namespace Breakout.Core.Scenes;
 
 public class SceneManager
 {

@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace Pong.Core.UI;
+namespace Breakout.Core.UI;
 
 public class Panel
 {

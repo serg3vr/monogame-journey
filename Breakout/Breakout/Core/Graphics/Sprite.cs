@@ -1,29 +1,21 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Pong.Core;
+namespace Breakout.Graphics.Core;
 
 public class Sprite
 {
-    public Texture2D Texture { get; set; }
+    public Texture2D Texture { get; }
     public Vector2 Position { get; set; }
-    public int Speed { get; set; }
-    public int Width;
-    public int Height;
+    public Vector2 Size { get; set; }
     public Color SpriteColor { get; set; }
+    public Rectangle Bounds => new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
 
-    public Rectangle Bounds => new Rectangle((int)Position.X, (int)Position.Y, Width, Height);
-    public int Top => (int)Position.Y;
-    public int Bottom => (int)Position.Y + Height;
-    public int Left => (int)Position.X;
-    public int Right => (int)Position.X + Width;
-
-    public Sprite(Texture2D texture, Vector2 position, int width, int height)
+    public Sprite(Texture2D texture, Vector2 position, Vector2 size)
     {
         Texture = texture;
         Position = position;
-        Width = width;
-        Height = height;
+        Size = size;
     }
 
     public void Draw(SpriteBatch spriteBatch)
