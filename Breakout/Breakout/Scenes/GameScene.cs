@@ -58,12 +58,12 @@ public class GameScene : Scene
 
         _ball = new Ball(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 29), new Vector2(32, 32));
         _ball.SpriteColor = Color.White;
-        _ball.Speed = 400f;
+        _ball.Speed = 600f;
         _ball.Velocity = Vector2.One;
 
         _paddle = new Paddle(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 30), new Vector2(blockWidth, 32));
         _paddle.SpriteColor = Color.White;
-        _paddle.Speed = 400f;
+        _paddle.Speed = 700f;
     }
 
     public override void Update(GameTime gameTime)
@@ -79,19 +79,41 @@ public class GameScene : Scene
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
     
         if (_ball.Bounds.Top < 0) {
-            _ball.Velocity = new Vector2(_ball.Velocity.X, 1);
+            _ball.Velocity = new Vector2(_ball.Velocity.X, MathF.Abs(_ball.Velocity.Y));
         }
         if (_ball.Bounds.Center.Y > _screenHeight) {
-            _ball.Velocity = new Vector2(_ball.Velocity.X, -1);
+            _ball.Velocity = new Vector2(_ball.Velocity.X, -MathF.Abs(_ball.Velocity.Y));
         }
         if (_ball.Bounds.Left < 0) {
-            _ball.Velocity = new Vector2(1, _ball.Velocity.Y);
+            _ball.Velocity = new Vector2(MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
         }
         if (_ball.Bounds.Center.X > _screenWidth) {
-            _ball.Velocity = new Vector2(-1, _ball.Velocity.Y);
+            _ball.Velocity = new Vector2(-MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
         }
 
         _ball.Position += _ball.Velocity * _ball.Speed * dt;
+        
+
+        if (_paddle.Bounds.Intersects(_ball.Bounds)) {
+            // _ball.Speed += SPEED_INCREMENT;
+            var leftPaddleIsMoving = ks.IsKeyDown(Keys.A) || ks.IsKeyDown(Keys.D);
+            var _leftPaddleMovementAccumulation = 0.00f;
+
+            if (leftPaddleIsMoving) {
+                float normalizedDis = MathF.Abs((_ball.Bounds.Center.X - _paddle.Bounds.Center.X) / (_paddle.Bounds.Width / 2f));
+                if (ks.IsKeyDown(Keys.D)) {
+                    normalizedDis = -normalizedDis;
+                }
+
+                float angleInRad = normalizedDis * MathHelper.ToRadians(60f + (7.5f * 1f + _leftPaddleMovementAccumulation)); // Max 75f
+                Vector2 dir = new Vector2(MathF.Cos(angleInRad), MathF.Sin(angleInRad));
+
+                _ball.Velocity = dir * (1f + _leftPaddleMovementAccumulation);
+            } else {
+                _ball.Velocity = new Vector2(_ball.Velocity.X, _ball.Velocity.Y * -1);
+            }
+        }
+
         _ball.Velocity.Normalize();
         
         _paddle.Velocity = Vector2.Zero;
@@ -104,9 +126,10 @@ public class GameScene : Scene
            _paddle.Velocity = new Vector2(1, 0); 
         }
 
+        _paddle.Velocity.Normalize();
         _paddle.Position += _paddle.Velocity * _paddle.Speed * dt;
         _paddle.Position = new Vector2(
-            MathHelper.Clamp(_paddle.Position.X, 0, _screenWidth), 
+            MathHelper.Clamp(_paddle.Position.X, 0, _screenWidth - _paddle.Bounds.Width), 
             _paddle.Position.Y
         );
     }
