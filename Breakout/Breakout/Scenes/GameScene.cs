@@ -77,6 +77,22 @@ public class GameScene : Scene
         // base.Update(gameTime);
 
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        _paddle.Velocity = Vector2.Zero;
+
+        if (ks.IsKeyDown(Keys.A)) {
+           _paddle.Velocity = new Vector2(-1, 0); 
+        }
+
+        if (ks.IsKeyDown(Keys.D)) {
+           _paddle.Velocity = new Vector2(1, 0); 
+        }
+
+        _paddle.Position += _paddle.Velocity * _paddle.Speed * dt;
+        _paddle.Position = new Vector2(
+            MathHelper.Clamp(_paddle.Position.X, 0, _screenWidth - _paddle.Bounds.Width), 
+            _paddle.Position.Y
+        );
     
         if (_ball.Bounds.Top < 0) {
             _ball.Velocity = new Vector2(_ball.Velocity.X, MathF.Abs(_ball.Velocity.Y));
@@ -91,47 +107,24 @@ public class GameScene : Scene
             _ball.Velocity = new Vector2(-MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
         }
 
-        _ball.Position += _ball.Velocity * _ball.Speed * dt;
-        
-
         if (_paddle.Bounds.Intersects(_ball.Bounds)) {
-            // _ball.Speed += SPEED_INCREMENT;
-            var leftPaddleIsMoving = ks.IsKeyDown(Keys.A) || ks.IsKeyDown(Keys.D);
-            var _leftPaddleMovementAccumulation = 0.00f;
+            var isMovingToLeft = ks.IsKeyDown(Keys.A);
+            var isMovingToRight = ks.IsKeyDown(Keys.D);
+            
 
-            if (leftPaddleIsMoving) {
-                float normalizedDis = MathF.Abs((_ball.Bounds.Center.X - _paddle.Bounds.Center.X) / (_paddle.Bounds.Width / 2f));
-                if (ks.IsKeyDown(Keys.D)) {
-                    normalizedDis = -normalizedDis;
-                }
+            if (isMovingToLeft || isMovingToRight) {
+                float hitPos = (_ball.Bounds.Center.X - _paddle.Bounds.Center.X) / (_paddle.Bounds.Width / 2f);
+                float angleInRad = MathHelper.Lerp(-150f, -30f, hitPos + 1f / 2f);
+                var moveX = Math.Abs(MathF.Sin(angleInRad)) * (isMovingToLeft ? -1 : 1);
 
-                float angleInRad = normalizedDis * MathHelper.ToRadians(60f + (7.5f * 1f + _leftPaddleMovementAccumulation)); // Max 75f
-                Vector2 dir = new Vector2(MathF.Cos(angleInRad), MathF.Sin(angleInRad));
-
-                _ball.Velocity = dir * (1f + _leftPaddleMovementAccumulation);
+                _ball.Velocity = new Vector2(moveX, -MathF.Cos(angleInRad));;
             } else {
                 _ball.Velocity = new Vector2(_ball.Velocity.X, _ball.Velocity.Y * -1);
             }
+            _ball.Position = new Vector2(_ball.Position.X, _paddle.Bounds.Top - _ball.Bounds.Height);
         }
 
-        _ball.Velocity.Normalize();
-        
-        _paddle.Velocity = Vector2.Zero;
-
-        if (ks.IsKeyDown(Keys.A)) {
-           _paddle.Velocity = new Vector2(-1, 0); 
-        }
-
-        if (ks.IsKeyDown(Keys.D)) {
-           _paddle.Velocity = new Vector2(1, 0); 
-        }
-
-        _paddle.Velocity.Normalize();
-        _paddle.Position += _paddle.Velocity * _paddle.Speed * dt;
-        _paddle.Position = new Vector2(
-            MathHelper.Clamp(_paddle.Position.X, 0, _screenWidth - _paddle.Bounds.Width), 
-            _paddle.Position.Y
-        );
+        _ball.Position += _ball.Velocity * _ball.Speed * dt;
     }
 
     public override void Draw(GameTime gameTime)
