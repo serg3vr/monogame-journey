@@ -53,34 +53,46 @@ public class GameScene : Scene
         _texture = new Texture2D(GraphicsDevice, 1, 1);
         _texture.SetData(new[] { Color.White });
 
-        int blockWidth = _screenWidth / 13;
-        int space = blockWidth / 12;
+        
+        float blockWidth = (_usableScreenWidth - 16f) * 2f / 13f;
+        float blockSpace = blockWidth / 14f;
+
+        float startingPointX = _usableScreenWidth + 16 + blockSpace;
+        float startingPointY = 64 + 16 + blockSpace;
 
         for (int y = 0; y < Rows; y++) {
             for (int x = 0; x < Columns; x++) {
-                var newBrick = new Brick(_texture, new Vector2(x * (blockWidth + space) + space, y * (32 + space) + space), new Vector2(blockWidth, 32));
+                var newBrick = new Brick(
+                    _texture,
+                    new Vector2(
+                        startingPointX + x * (blockWidth + blockSpace),
+                        startingPointY + y * (16 + blockSpace)
+                    ),
+                    new Vector2(blockWidth, 16)
+                );
                 newBrick.SpriteColor = _colors[y];
                 _bricks.Add(newBrick);
             }
         }
 
-        _ball = new Ball(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 29), new Vector2(32, 32));
+        _ball = new Ball(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 29), new Vector2(24, 24));
         _ball.SpriteColor = Color.White;
         _ball.Speed = 600f;
         _ball.Velocity = Vector2.One;
 
-        _paddle = new Paddle(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 30), new Vector2(blockWidth, 32));
+        _paddle = new Paddle(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 30), new Vector2(blockWidth, 16));
         _paddle.SpriteColor = Color.White;
         _paddle.Speed = 700f;
 
-        _walls.Add(new Wall(_texture, new Vector2((int)_usableScreenWidth, 64), new Vector2((int)_usableScreenWidth * 2, 16)));
-        _walls.Add(new Wall(_texture, new Vector2((int)_usableScreenWidth, _screenHeight - 16 - 16), new Vector2((int)_usableScreenWidth * 2, 16)));
-        _walls.Add(new Wall(_texture, new Vector2((int)_usableScreenWidth, 64 + 16), new Vector2(16, _screenHeight - 16 - 16 - 64 - 16)));
-        _walls.Add(new Wall(_texture, new Vector2((int)_usableScreenWidth * 3 - 16, 64 + 16), new Vector2(16, _screenHeight - 16 - 16 - 64 - 16)));
+        _walls.Add(new Wall(_texture, new Vector2(_usableScreenWidth, 64), new Vector2(_usableScreenWidth * 2, 16)));
+        _walls.Add(new Wall(_texture, new Vector2(_usableScreenWidth, _screenHeight - 16 - 16), new Vector2(_usableScreenWidth * 2, 16)));
+        _walls.Add(new Wall(_texture, new Vector2(_usableScreenWidth, 64 + 16), new Vector2(16, _screenHeight - 16 - 16 - 64 - 16)));
+        _walls.Add(new Wall(_texture, new Vector2(_usableScreenWidth * 3 - 16, 64 + 16), new Vector2(16, _screenHeight - 16 - 16 - 64 - 16)));
 
         foreach (var wall in _walls) {
             wall.SpriteColor = Color.White;
         }
+        _walls[1].SpriteColor = new Color(21, 21, 21);
     }
 
     public override void Update(GameTime gameTime)
@@ -103,7 +115,7 @@ public class GameScene : Scene
 
         _paddle.Position += _paddle.Velocity * _paddle.Speed * dt;
         _paddle.Position = new Vector2(
-            MathHelper.Clamp(_paddle.Position.X, 0, _screenWidth - _paddle.Bounds.Width),
+            MathHelper.Clamp(_paddle.Position.X, _walls[2].Bounds.Right, _walls[3].Bounds.Left - _paddle.Bounds.Width),
             _paddle.Position.Y
         );
 
