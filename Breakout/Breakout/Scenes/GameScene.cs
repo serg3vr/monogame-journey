@@ -107,35 +107,17 @@ public class GameScene : Scene
             _paddle.Position.Y
         );
 
-        // if (_ball.Bounds.Top < 0) {
-        //     _ball.Velocity = new Vector2(_ball.Velocity.X, MathF.Abs(_ball.Velocity.Y));
-        // }
-        // if (_ball.Bounds.Center.Y > _screenHeight) {
-        //     _ball.Velocity = new Vector2(_ball.Velocity.X, -MathF.Abs(_ball.Velocity.Y));
-        // }
-        // if (_ball.Bounds.Left < 0) {
-        //     _ball.Velocity = new Vector2(MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
-        // }
-        // if (_ball.Bounds.Center.X > _screenWidth) {
-        //     _ball.Velocity = new Vector2(-MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
-        // }
-
-        foreach (var wall in _walls) {
-            if (_ball.Bounds.Intersects(wall.Bounds)) {
-                if (_ball.Bounds.Center.Y > wall.Bounds.Center.Y) {
-                    _ball.Velocity = new Vector2(_ball.Velocity.X, MathF.Abs(_ball.Velocity.Y));
-                }
-                if (_ball.Bounds.Center.Y < wall.Bounds.Center.Y) {
-                    _ball.Velocity = new Vector2(_ball.Velocity.X, -MathF.Abs(_ball.Velocity.Y));
-                }
-                if (_ball.Bounds.Center.X > wall.Bounds.Center.X) {
-                    _ball.Velocity = new Vector2(MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
-                }
-                if (_ball.Bounds.Center.X < wall.Bounds.Center.X) {
-                    _ball.Velocity = new Vector2(-MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
-                }
-                break;
-            }
+        if (_ball.Bounds.Top < _walls[0].Bounds.Bottom) {
+            _ball.Velocity = new Vector2(_ball.Velocity.X, MathF.Abs(_ball.Velocity.Y));
+        }
+        if (_ball.Bounds.Bottom > _walls[1].Bounds.Top) {
+            _ball.Velocity = new Vector2(_ball.Velocity.X, -MathF.Abs(_ball.Velocity.Y));
+        }
+        if (_ball.Bounds.Left < _walls[2].Bounds.Right) {
+            _ball.Velocity = new Vector2(MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
+        }
+        if (_ball.Bounds.Right > _walls[3].Bounds.Left) {
+            _ball.Velocity = new Vector2(-MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
         }
 
         Brick? hittedBrick = null;
@@ -166,7 +148,7 @@ public class GameScene : Scene
 
             // if (isMovingToLeft || isMovingToRight) {
             float hitPos = (_ball.Bounds.Center.X - _paddle.Bounds.Center.X) / (_paddle.Bounds.Width / 2f);
-            float angleDeg = MathHelper.Lerp(-120f, -60f, (hitPos + 1f) / 2f);
+            float angleDeg = MathHelper.Lerp(-150f, -30f, (hitPos + 1f) / 2f);
             float angleRad = MathHelper.ToRadians(angleDeg);
             float moveX = Math.Abs(MathF.Cos(angleRad)); // * (isMovingToLeft ? -1 : 1);
 
