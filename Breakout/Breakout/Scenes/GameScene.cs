@@ -14,6 +14,7 @@ public class GameScene : Scene
 {
     private int _screenWidth;
     private int _screenHeight;
+    private float _usableScreenWidth;
 
     private Texture2D _texture;
 
@@ -21,6 +22,7 @@ public class GameScene : Scene
     private const int Columns = 12;
     private List<Brick> _bricks;
     private Color[] _colors = { Color.Red, Color.Orange, Color.Yellow, Color.Green, Color.Purple, Color.Cyan };
+    private List<Wall> _walls;
 
     private Ball _ball;
     private Paddle _paddle;
@@ -40,7 +42,10 @@ public class GameScene : Scene
         _screenWidth = GraphicsDevice.Viewport.Width;
         _screenHeight = GraphicsDevice.Viewport.Height;
 
+        _usableScreenWidth = _screenWidth / 4f;
+
         _bricks = new List<Brick>();
+        _walls = new List<Wall>();
     }
 
     public override void LoadContent()
@@ -67,6 +72,15 @@ public class GameScene : Scene
         _paddle = new Paddle(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 30), new Vector2(blockWidth, 32));
         _paddle.SpriteColor = Color.White;
         _paddle.Speed = 700f;
+
+        _walls.Add(new Wall(_texture, new Vector2((int)_usableScreenWidth, 64), new Vector2((int)_usableScreenWidth * 2, 16)));
+        _walls.Add(new Wall(_texture, new Vector2((int)_usableScreenWidth, _screenHeight - 16 - 16), new Vector2((int)_usableScreenWidth * 2, 16)));
+        _walls.Add(new Wall(_texture, new Vector2((int)_usableScreenWidth, 64 + 16), new Vector2(16, _screenHeight - 16 - 16 - 64 - 16)));
+        _walls.Add(new Wall(_texture, new Vector2((int)_usableScreenWidth * 3 - 16, 64 + 16), new Vector2(16, _screenHeight - 16 - 16 - 64 - 16)));
+
+        foreach (var wall in _walls) {
+            wall.SpriteColor = Color.White;
+        }
     }
 
     public override void Update(GameTime gameTime)
@@ -93,17 +107,35 @@ public class GameScene : Scene
             _paddle.Position.Y
         );
 
-        if (_ball.Bounds.Top < 0) {
-            _ball.Velocity = new Vector2(_ball.Velocity.X, MathF.Abs(_ball.Velocity.Y));
-        }
-        if (_ball.Bounds.Center.Y > _screenHeight) {
-            _ball.Velocity = new Vector2(_ball.Velocity.X, -MathF.Abs(_ball.Velocity.Y));
-        }
-        if (_ball.Bounds.Left < 0) {
-            _ball.Velocity = new Vector2(MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
-        }
-        if (_ball.Bounds.Center.X > _screenWidth) {
-            _ball.Velocity = new Vector2(-MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
+        // if (_ball.Bounds.Top < 0) {
+        //     _ball.Velocity = new Vector2(_ball.Velocity.X, MathF.Abs(_ball.Velocity.Y));
+        // }
+        // if (_ball.Bounds.Center.Y > _screenHeight) {
+        //     _ball.Velocity = new Vector2(_ball.Velocity.X, -MathF.Abs(_ball.Velocity.Y));
+        // }
+        // if (_ball.Bounds.Left < 0) {
+        //     _ball.Velocity = new Vector2(MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
+        // }
+        // if (_ball.Bounds.Center.X > _screenWidth) {
+        //     _ball.Velocity = new Vector2(-MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
+        // }
+
+        foreach (var wall in _walls) {
+            if (_ball.Bounds.Intersects(wall.Bounds)) {
+                if (_ball.Bounds.Center.Y > wall.Bounds.Center.Y) {
+                    _ball.Velocity = new Vector2(_ball.Velocity.X, MathF.Abs(_ball.Velocity.Y));
+                }
+                if (_ball.Bounds.Center.Y < wall.Bounds.Center.Y) {
+                    _ball.Velocity = new Vector2(_ball.Velocity.X, -MathF.Abs(_ball.Velocity.Y));
+                }
+                if (_ball.Bounds.Center.X > wall.Bounds.Center.X) {
+                    _ball.Velocity = new Vector2(MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
+                }
+                if (_ball.Bounds.Center.X < wall.Bounds.Center.X) {
+                    _ball.Velocity = new Vector2(-MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
+                }
+                break;
+            }
         }
 
         Brick? hittedBrick = null;
@@ -133,18 +165,18 @@ public class GameScene : Scene
             var isMovingToRight = ks.IsKeyDown(Keys.D);
 
             // if (isMovingToLeft || isMovingToRight) {
-                float hitPos = (_ball.Bounds.Center.X - _paddle.Bounds.Center.X) / (_paddle.Bounds.Width / 2f);
-                float angleDeg = MathHelper.Lerp(-120f, -60f, (hitPos + 1f) / 2f);
-                float angleRad = MathHelper.ToRadians(angleDeg);
-                float moveX = Math.Abs(MathF.Cos(angleRad)); // * (isMovingToLeft ? -1 : 1);
+            float hitPos = (_ball.Bounds.Center.X - _paddle.Bounds.Center.X) / (_paddle.Bounds.Width / 2f);
+            float angleDeg = MathHelper.Lerp(-120f, -60f, (hitPos + 1f) / 2f);
+            float angleRad = MathHelper.ToRadians(angleDeg);
+            float moveX = Math.Abs(MathF.Cos(angleRad)); // * (isMovingToLeft ? -1 : 1);
 
-                if (isMovingToLeft) {
-                    moveX = -Math.Abs(MathF.Cos(angleRad));
-                } else if (isMovingToRight) {
-                    moveX = Math.Abs(MathF.Cos(angleRad));
-                }
+            if (isMovingToLeft) {
+                moveX = -Math.Abs(MathF.Cos(angleRad));
+            } else if (isMovingToRight) {
+                moveX = Math.Abs(MathF.Cos(angleRad));
+            }
 
-                _ball.Velocity = new Vector2(moveX, MathF.Sin(angleRad)); ;
+            _ball.Velocity = new Vector2(moveX, MathF.Sin(angleRad)); ;
             // } else {
             //     _ball.Velocity = new Vector2(_ball.Velocity.X, _ball.Velocity.Y * -1);
             // }
@@ -165,6 +197,16 @@ public class GameScene : Scene
         _ball.Draw(SpriteBatch);
 
         _paddle.Draw(SpriteBatch);
+
+        // SpriteBatch.Draw(_texture, new Rectangle((int)_usableScreenWidth, 64, (int)_usableScreenWidth * 2, 16), Color.White);
+        // SpriteBatch.Draw(_texture, new Rectangle((int)_usableScreenWidth, _screenHeight - 16 - 16, (int)_usableScreenWidth * 2, 16), Color.Red);
+        // SpriteBatch.Draw(_texture, new Rectangle((int)_usableScreenWidth, 64 + 16, 16, _screenHeight - 16 - 16 - 64 - 16), Color.Green);
+        // SpriteBatch.Draw(_texture, new Rectangle((int)_usableScreenWidth * 3 - 16, 64 + 16, 16, _screenHeight - 16 - 16 - 64 - 16), Color.Blue);
+
+        foreach (var wall in _walls) {
+            wall.Draw(SpriteBatch);
+        }
+
 
         SpriteBatch.End();
     }
