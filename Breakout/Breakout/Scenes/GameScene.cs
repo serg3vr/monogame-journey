@@ -148,7 +148,7 @@ public class GameScene : Scene
                 if (_ball.Bounds.Top > brick.Bounds.Top) {
                     _ball.Velocity = new Vector2(_ball.Velocity.X, MathF.Abs(_ball.Velocity.Y));
                 }
-                if (_ball.Bounds.Bottom < brick.Bounds.Top) {
+                if (_ball.Bounds.Bottom < brick.Bounds.Bottom) {
                     _ball.Velocity = new Vector2(_ball.Velocity.X, -MathF.Abs(_ball.Velocity.Y));
                 }
                 if (_ball.Bounds.Left > brick.Bounds.Right) {
