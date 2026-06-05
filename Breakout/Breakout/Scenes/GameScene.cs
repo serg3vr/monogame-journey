@@ -20,12 +20,17 @@ public class GameScene : Scene
 
     private const int Rows = 6;
     private const int Columns = 12;
+    private const float RECT_WIDTH = 16;
+
     private List<Brick> _bricks;
     private Color[] _colors = { Color.Red, Color.Orange, Color.Yellow, Color.Green, Color.Purple, Color.Cyan };
     private List<Wall> _walls;
 
     private Ball _ball;
     private Paddle _paddle;
+
+    private SpriteFont _spriteFont;
+    private float currentDeg;
 
     public GameScene(
         ContentManager contentManager,
@@ -57,8 +62,10 @@ public class GameScene : Scene
         float blockWidth = (_usableScreenWidth - 16f) * 2f / 13f;
         float blockSpace = blockWidth / 14f;
 
-        float startingPointX = _usableScreenWidth + 16 + blockSpace;
-        float startingPointY = 64 + 16 + blockSpace;
+        float startingPointX = _usableScreenWidth + RECT_WIDTH + blockSpace;
+        float startingPointY = RECT_WIDTH * 7 + blockSpace;
+
+        float paddleWidth = blockWidth * 1.5f;
 
         for (int y = 0; y < Rows; y++) {
             for (int x = 0; x < Columns; x++) {
@@ -75,24 +82,26 @@ public class GameScene : Scene
             }
         }
 
-        _ball = new Ball(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 29), new Vector2(24, 24));
+        _ball = new Ball(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 29), new Vector2(16, 16));
         _ball.SpriteColor = Color.White;
-        _ball.Speed = 600f;
+        _ball.Speed = 400f;
         _ball.Velocity = Vector2.One;
 
-        _paddle = new Paddle(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 30), new Vector2(blockWidth, 16));
+        _paddle = new Paddle(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 30), new Vector2(paddleWidth, 16));
         _paddle.SpriteColor = Color.White;
-        _paddle.Speed = 700f;
+        _paddle.Speed = 500f;
 
-        _walls.Add(new Wall(_texture, new Vector2(_usableScreenWidth, 64), new Vector2(_usableScreenWidth * 2, 16)));
-        _walls.Add(new Wall(_texture, new Vector2(_usableScreenWidth, _screenHeight - 16 - 16), new Vector2(_usableScreenWidth * 2, 16)));
-        _walls.Add(new Wall(_texture, new Vector2(_usableScreenWidth, 64 + 16), new Vector2(16, _screenHeight - 16 - 16 - 64 - 16)));
-        _walls.Add(new Wall(_texture, new Vector2(_usableScreenWidth * 3 - 16, 64 + 16), new Vector2(16, _screenHeight - 16 - 16 - 64 - 16)));
+        _walls.Add(new Wall(_texture, new Vector2(_usableScreenWidth, RECT_WIDTH * 2), new Vector2(_usableScreenWidth * 2, RECT_WIDTH)));
+        _walls.Add(new Wall(_texture, new Vector2(_usableScreenWidth, _screenHeight - RECT_WIDTH), new Vector2(_usableScreenWidth * 2, RECT_WIDTH)));
+        _walls.Add(new Wall(_texture, new Vector2(_usableScreenWidth, RECT_WIDTH * 3), new Vector2(RECT_WIDTH, _screenHeight - RECT_WIDTH * 5)));
+        _walls.Add(new Wall(_texture, new Vector2(_usableScreenWidth * 3 - RECT_WIDTH, RECT_WIDTH * 3), new Vector2(RECT_WIDTH, _screenHeight - RECT_WIDTH * 5)));
 
         foreach (var wall in _walls) {
             wall.SpriteColor = Color.White;
         }
         _walls[1].SpriteColor = new Color(21, 21, 21);
+
+        _spriteFont = ContentManager.Load<SpriteFont>("fonts/myfont");
     }
 
     public override void Update(GameTime gameTime)
@@ -158,11 +167,11 @@ public class GameScene : Scene
             var isMovingToLeft = ks.IsKeyDown(Keys.A);
             var isMovingToRight = ks.IsKeyDown(Keys.D);
 
-            // if (isMovingToLeft || isMovingToRight) {
-            float hitPos = (_ball.Bounds.Center.X - _paddle.Bounds.Center.X) / (_paddle.Bounds.Width / 2f);
+            float hitPos = MathHelper.Clamp((_ball.Bounds.Center.X - _paddle.Bounds.Center.X) / (_paddle.Bounds.Width / 2f), -1, 1);
             float angleDeg = MathHelper.Lerp(-150f, -30f, (hitPos + 1f) / 2f);
+            currentDeg = angleDeg;
             float angleRad = MathHelper.ToRadians(angleDeg);
-            float moveX = Math.Abs(MathF.Cos(angleRad)); // * (isMovingToLeft ? -1 : 1);
+            float moveX = Math.Abs(MathF.Cos(angleRad));
 
             if (isMovingToLeft) {
                 moveX = -Math.Abs(MathF.Cos(angleRad));
@@ -170,10 +179,7 @@ public class GameScene : Scene
                 moveX = Math.Abs(MathF.Cos(angleRad));
             }
 
-            _ball.Velocity = new Vector2(moveX, MathF.Sin(angleRad)); ;
-            // } else {
-            //     _ball.Velocity = new Vector2(_ball.Velocity.X, _ball.Velocity.Y * -1);
-            // }
+            _ball.Velocity = new Vector2(moveX, MathF.Sin(angleRad));
             _ball.Position = new Vector2(_ball.Position.X, _paddle.Bounds.Top - _ball.Bounds.Height);
         }
 
@@ -201,6 +207,7 @@ public class GameScene : Scene
             wall.Draw(SpriteBatch);
         }
 
+        SpriteBatch.DrawString(_spriteFont, "Ball angle: " + currentDeg.ToString(), new Vector2(100, 100), Color.Red);
 
         SpriteBatch.End();
     }
