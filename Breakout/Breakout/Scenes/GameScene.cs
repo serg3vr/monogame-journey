@@ -7,6 +7,7 @@ using Breakout.Core.Scenes;
 using Breakout.Graphics.Core;
 using Breakout.GameObjects;
 using System.Collections.Generic;
+using Breakout.Core.UI;
 
 namespace Breakout;
 
@@ -32,6 +33,17 @@ public class GameScene : Scene
     private SpriteFont _spriteFont;
     private float currentDeg;
 
+    private Heart _heart;
+    private int _lives;
+
+    private bool _isPause;
+    private float _timerToUnpause;
+    private bool _isGameOver;
+
+    private Panel _panel;
+    private Text _gameOverText;
+    private Button _restartButton;
+
     public GameScene(
         ContentManager contentManager,
         GraphicsDevice graphicsDevice,
@@ -51,13 +63,16 @@ public class GameScene : Scene
 
         _bricks = new List<Brick>();
         _walls = new List<Wall>();
+
+        _lives = 3;
+        _isPause = false;
+        _isGameOver = false;
     }
 
     public override void LoadContent()
     {
         _texture = new Texture2D(GraphicsDevice, 1, 1);
         _texture.SetData(new[] { Color.White });
-
         
         float blockWidth = (_usableScreenWidth - 16f) * 2f / 13f;
         float blockSpace = blockWidth / 14f;
@@ -89,7 +104,7 @@ public class GameScene : Scene
 
         _paddle = new Paddle(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 30), new Vector2(paddleWidth, 16));
         _paddle.SpriteColor = Color.White;
-        _paddle.Speed = 500f;
+        _paddle.Speed = 400f;
 
         _walls.Add(new Wall(_texture, new Vector2(_usableScreenWidth, RECT_WIDTH * 2), new Vector2(_usableScreenWidth * 2, RECT_WIDTH)));
         _walls.Add(new Wall(_texture, new Vector2(_usableScreenWidth, _screenHeight - RECT_WIDTH), new Vector2(_usableScreenWidth * 2, RECT_WIDTH)));
@@ -102,6 +117,20 @@ public class GameScene : Scene
         _walls[1].SpriteColor = new Color(21, 21, 21);
 
         _spriteFont = ContentManager.Load<SpriteFont>("fonts/myfont");
+
+        _heart = new Heart(_texture, new Vector2(32, 32), new Vector2(32, 32));
+        _heart.SpriteColor = Color.DarkRed;
+
+        _panel = new Panel(_texture, _spriteFont, new Rectangle((int)_usableScreenWidth, 32, (int)_usableScreenWidth * 2, (int)_usableScreenWidth * 2));
+        _restartButton = new Button(_texture, _spriteFont, new Rectangle(200, 100, 100, 100), "Restart");
+
+        _gameOverText = new Text(_spriteFont, new Vector2(200, 200));
+        _gameOverText.Scale = Vector2.One;
+        _gameOverText.Content = "GAMER OVER";
+
+        _restartButton.OnClick = () => {
+          SceneManager.ChangeScene(new GameScene(ContentManager, GraphicsDevice, SpriteBatch, SceneManager));  
+        };
     }
 
     public override void Update(GameTime gameTime)
@@ -109,8 +138,24 @@ public class GameScene : Scene
         KeyboardState ks = Keyboard.GetState();
         // if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
         // Exit();
-
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+        if (_isGameOver) {
+            _restartButton.Update();
+        }
+
+        if (_isPause) {
+            if (!_isGameOver) {
+                _timerToUnpause -= dt;
+
+                if (_timerToUnpause <= 0) {
+                    _isPause = false;
+                }
+            }
+
+            return;
+        }
+
 
         _paddle.Velocity = Vector2.Zero;
 
@@ -132,7 +177,10 @@ public class GameScene : Scene
             _ball.Velocity = new Vector2(_ball.Velocity.X, MathF.Abs(_ball.Velocity.Y));
         }
         if (_ball.Bounds.Bottom > _walls[1].Bounds.Top) {
-            _ball.Velocity = new Vector2(_ball.Velocity.X, -MathF.Abs(_ball.Velocity.Y));
+            // _ball.Velocity = new Vector2(_ball.Velocity.X, -MathF.Abs(_ball.Velocity.Y));
+            _isPause = true;
+            _timerToUnpause = 1f;
+            ResetPositions();
         }
         if (_ball.Bounds.Left < _walls[2].Bounds.Right) {
             _ball.Velocity = new Vector2(MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
@@ -209,6 +257,27 @@ public class GameScene : Scene
 
         SpriteBatch.DrawString(_spriteFont, "Ball angle: " + currentDeg.ToString(), new Vector2(100, 100), Color.Red);
 
+        _heart.Draw(SpriteBatch);
+        SpriteBatch.DrawString(_spriteFont, _lives.ToString(), new Vector2(64, 32), Color.Red, 0f, Vector2.Zero, new Vector2(2f, 2f), SpriteEffects.None, 0f);
+
+
+        if (_isGameOver) {
+            _panel.Draw(SpriteBatch);
+            _gameOverText.Draw(SpriteBatch);
+            _restartButton.Draw(SpriteBatch);
+        }
+
         SpriteBatch.End();
+    }
+
+    private void ResetPositions()
+    {
+        _ball.Position = new Vector2(_screenWidth / 2, (_screenHeight / 32) * 29);
+        _paddle.Position = new Vector2(_screenWidth / 2, (_screenHeight / 32) * 30);
+        _lives -= 1;
+
+        if (_lives <= 0) {
+            _isGameOver = true;
+        }
     }
 }
