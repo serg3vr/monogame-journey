@@ -12,6 +12,8 @@ namespace Breakout;
 
 public class GameScene : Scene
 {
+    private static readonly Random _random = new();
+
     private int _screenWidth;
     private int _screenHeight;
     private float _usableScreenWidth;
@@ -43,6 +45,9 @@ public class GameScene : Scene
     private Text _gameOverText;
     private Button _restartButton;
 
+    private List<PowerUp1> _powerUps1;
+    private Color[] _powerUpsColors = { Color.Red, Color.Orange, Color.Yellow, Color.Green, Color.Purple, Color.Cyan };
+
     public GameScene(
         ContentManager contentManager,
         GraphicsDevice graphicsDevice,
@@ -68,6 +73,7 @@ public class GameScene : Scene
         _isGameOver = false;
 
         _balls = new List<Ball>();
+        _powerUps1 = new List<PowerUp1>();
     }
 
     public override void LoadContent()
@@ -94,11 +100,12 @@ public class GameScene : Scene
                     new Vector2(blockWidth, 16)
                 );
                 newBrick.SpriteColor = _colors[y];
+                newBrick.HasPowerUp = _random.Next(5) == 1;
                 _bricks.Add(newBrick);
             }
         }
 
-        GenerateBalls();
+        GenerateExtraBalls();
 
         _paddle = new Paddle(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 30), new Vector2(paddleWidth, 16));
         _paddle.SpriteColor = Color.White;
@@ -154,7 +161,6 @@ public class GameScene : Scene
             return;
         }
 
-
         _paddle.Velocity = Vector2.Zero;
 
         if (ks.IsKeyDown(Keys.A)) {
@@ -170,6 +176,10 @@ public class GameScene : Scene
             MathHelper.Clamp(_paddle.Position.X, _walls[2].Bounds.Right, _walls[3].Bounds.Left - _paddle.Bounds.Width),
             _paddle.Position.Y
         );
+
+        _powerUps1.ForEach(elm => {
+            elm.Position += elm.Velocity * elm.Speed * dt;
+        });
 
         Ball? hittedBall = null;
 
@@ -205,6 +215,9 @@ public class GameScene : Scene
                         ball.Velocity = new Vector2(-MathF.Abs(ball.Velocity.X), ball.Velocity.Y);
                     }
                     hittedBrick = brick;
+                    if (brick.HasPowerUp) {
+                        CreatePowerUp(brick.Position);
+                    }
                     break;
                 }
             }
@@ -233,6 +246,15 @@ public class GameScene : Scene
             ball.Position += ball.Velocity * ball.Speed * dt;
         }
 
+        foreach (var powerUp in _powerUps1) {
+            if (_paddle.Bounds.Intersects(powerUp.Bounds)) {
+                powerUp.ShouldBeDestroyed = true;
+                GenerateExtraBalls(2);
+            }
+        }
+
+        _powerUps1.RemoveAll(elm => elm.ShouldBeDestroyed);
+
         _balls.Remove(hittedBall);
 
         if (_balls.Count == 0) {
@@ -257,11 +279,6 @@ public class GameScene : Scene
 
         _paddle.Draw(SpriteBatch);
 
-        // SpriteBatch.Draw(_texture, new Rectangle((int)_usableScreenWidth, 64, (int)_usableScreenWidth * 2, 16), Color.White);
-        // SpriteBatch.Draw(_texture, new Rectangle((int)_usableScreenWidth, _screenHeight - 16 - 16, (int)_usableScreenWidth * 2, 16), Color.Red);
-        // SpriteBatch.Draw(_texture, new Rectangle((int)_usableScreenWidth, 64 + 16, 16, _screenHeight - 16 - 16 - 64 - 16), Color.Green);
-        // SpriteBatch.Draw(_texture, new Rectangle((int)_usableScreenWidth * 3 - 16, 64 + 16, 16, _screenHeight - 16 - 16 - 64 - 16), Color.Blue);
-
         foreach (var wall in _walls) {
             wall.Draw(SpriteBatch);
         }
@@ -271,6 +288,9 @@ public class GameScene : Scene
         _heart.Draw(SpriteBatch);
         SpriteBatch.DrawString(_spriteFont, _lives.ToString(), new Vector2(64, 32), Color.Red, 0f, Vector2.Zero, new Vector2(2f, 2f), SpriteEffects.None, 0f);
 
+        foreach (var powerUp in _powerUps1) {
+            powerUp.Draw(SpriteBatch);
+        }
 
         if (_isGameOver) {
             _panel.Draw(SpriteBatch);
@@ -283,7 +303,7 @@ public class GameScene : Scene
 
     private void ResetPositions()
     {
-        GenerateBalls();
+        GenerateExtraBalls();
 
         _paddle.Position = new Vector2(_screenWidth / 2, (_screenHeight / 32) * 30);
         _lives -= 1;
@@ -293,14 +313,28 @@ public class GameScene : Scene
         }
     }
 
-    private void GenerateBalls()
+    private void GenerateExtraBalls(int extra = 1)
     {
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < extra; i++) {
             var ball = new Ball(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 29), new Vector2(16, 16));
             ball.SpriteColor = Color.White;
-            ball.Speed = 400f + i * 50f;
-            ball.Velocity = Vector2.One;
+            ball.Speed = 400f;
+            ball.Velocity = -Vector2.One;
             _balls.Add(ball);
         }
+    }
+
+    private void CreatePowerUp(Vector2 pos)
+    {
+        var powerUp = new PowerUp1(_texture, pos, new Vector2(32, 16));
+        // powerUp.SpriteColor = new Color(
+        //     _random.Next(255),
+        //     _random.Next(255),
+        //     _random.Next(255)
+        // );
+        powerUp.SpriteColor = _powerUpsColors[_random.Next(_powerUpsColors.Length)];
+        powerUp.Speed = 200f;
+        powerUp.Velocity = new Vector2(0f, 1f);
+        _powerUps1.Add(powerUp);
     }
 }
