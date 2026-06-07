@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Breakout.Core.Scenes;
-using Breakout.Graphics.Core;
 using Breakout.GameObjects;
 using System.Collections.Generic;
 using Breakout.Core.UI;
@@ -27,7 +26,7 @@ public class GameScene : Scene
     private Color[] _colors = { Color.Red, Color.Orange, Color.Yellow, Color.Green, Color.Purple, Color.Cyan };
     private List<Wall> _walls;
 
-    private Ball _ball;
+    private List<Ball> _balls;
     private Paddle _paddle;
 
     private SpriteFont _spriteFont;
@@ -67,13 +66,15 @@ public class GameScene : Scene
         _lives = 3;
         _isPause = false;
         _isGameOver = false;
+
+        _balls = new List<Ball>();
     }
 
     public override void LoadContent()
     {
         _texture = new Texture2D(GraphicsDevice, 1, 1);
         _texture.SetData(new[] { Color.White });
-        
+
         float blockWidth = (_usableScreenWidth - 16f) * 2f / 13f;
         float blockSpace = blockWidth / 14f;
 
@@ -97,10 +98,7 @@ public class GameScene : Scene
             }
         }
 
-        _ball = new Ball(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 29), new Vector2(16, 16));
-        _ball.SpriteColor = Color.White;
-        _ball.Speed = 400f;
-        _ball.Velocity = Vector2.One;
+        GenerateBalls();
 
         _paddle = new Paddle(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 30), new Vector2(paddleWidth, 16));
         _paddle.SpriteColor = Color.White;
@@ -129,7 +127,7 @@ public class GameScene : Scene
         _gameOverText.Content = "GAMER OVER";
 
         _restartButton.OnClick = () => {
-          SceneManager.ChangeScene(new GameScene(ContentManager, GraphicsDevice, SpriteBatch, SceneManager));  
+            SceneManager.ChangeScene(new GameScene(ContentManager, GraphicsDevice, SpriteBatch, SceneManager));
         };
     }
 
@@ -173,65 +171,76 @@ public class GameScene : Scene
             _paddle.Position.Y
         );
 
-        if (_ball.Bounds.Top < _walls[0].Bounds.Bottom) {
-            _ball.Velocity = new Vector2(_ball.Velocity.X, MathF.Abs(_ball.Velocity.Y));
+        Ball? hittedBall = null;
+
+        foreach (var ball in _balls) {
+            if (ball.Bounds.Top < _walls[0].Bounds.Bottom) {
+                ball.Velocity = new Vector2(ball.Velocity.X, MathF.Abs(ball.Velocity.Y));
+            }
+            if (ball.Bounds.Bottom > _walls[1].Bounds.Top) {
+                // ball.Velocity = new Vector2(ball.Velocity.X, -MathF.Abs(ball.Velocity.Y));
+                hittedBall = ball;
+            }
+            if (ball.Bounds.Left < _walls[2].Bounds.Right) {
+                ball.Velocity = new Vector2(MathF.Abs(ball.Velocity.X), ball.Velocity.Y);
+            }
+            if (ball.Bounds.Right > _walls[3].Bounds.Left) {
+                ball.Velocity = new Vector2(-MathF.Abs(ball.Velocity.X), ball.Velocity.Y);
+            }
+
+            Brick? hittedBrick = null;
+
+            foreach (var brick in _bricks) {
+                if (ball.Bounds.Intersects(brick.Bounds)) {
+                    if (ball.Bounds.Top > brick.Bounds.Top) {
+                        ball.Velocity = new Vector2(ball.Velocity.X, MathF.Abs(ball.Velocity.Y));
+                    }
+                    if (ball.Bounds.Bottom < brick.Bounds.Bottom) {
+                        ball.Velocity = new Vector2(ball.Velocity.X, -MathF.Abs(ball.Velocity.Y));
+                    }
+                    if (ball.Bounds.Left > brick.Bounds.Right) {
+                        ball.Velocity = new Vector2(MathF.Abs(ball.Velocity.X), ball.Velocity.Y);
+                    }
+                    if (ball.Bounds.Right < brick.Bounds.Left) {
+                        ball.Velocity = new Vector2(-MathF.Abs(ball.Velocity.X), ball.Velocity.Y);
+                    }
+                    hittedBrick = brick;
+                    break;
+                }
+            }
+            _bricks.Remove(hittedBrick);
+
+            if (_paddle.Bounds.Intersects(ball.Bounds)) {
+                var isMovingToLeft = ks.IsKeyDown(Keys.A);
+                var isMovingToRight = ks.IsKeyDown(Keys.D);
+
+                float hitPos = MathHelper.Clamp((ball.Bounds.Center.X - _paddle.Bounds.Center.X) / (_paddle.Bounds.Width / 2f), -1, 1);
+                float angleDeg = MathHelper.Lerp(-150f, -30f, (hitPos + 1f) / 2f);
+                currentDeg = angleDeg;
+                float angleRad = MathHelper.ToRadians(angleDeg);
+                float moveX = Math.Abs(MathF.Cos(angleRad));
+
+                if (isMovingToLeft) {
+                    moveX = -Math.Abs(MathF.Cos(angleRad));
+                } else if (isMovingToRight) {
+                    moveX = Math.Abs(MathF.Cos(angleRad));
+                }
+
+                ball.Velocity = new Vector2(moveX, MathF.Sin(angleRad));
+                ball.Position = new Vector2(ball.Position.X, _paddle.Bounds.Top - ball.Bounds.Height);
+            }
+
+            ball.Position += ball.Velocity * ball.Speed * dt;
         }
-        if (_ball.Bounds.Bottom > _walls[1].Bounds.Top) {
-            // _ball.Velocity = new Vector2(_ball.Velocity.X, -MathF.Abs(_ball.Velocity.Y));
+
+        _balls.Remove(hittedBall);
+
+        if (_balls.Count == 0) {
             _isPause = true;
             _timerToUnpause = 1f;
+
             ResetPositions();
         }
-        if (_ball.Bounds.Left < _walls[2].Bounds.Right) {
-            _ball.Velocity = new Vector2(MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
-        }
-        if (_ball.Bounds.Right > _walls[3].Bounds.Left) {
-            _ball.Velocity = new Vector2(-MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
-        }
-
-        Brick? hittedBrick = null;
-
-        foreach (var brick in _bricks) {
-            if (_ball.Bounds.Intersects(brick.Bounds)) {
-                if (_ball.Bounds.Top > brick.Bounds.Top) {
-                    _ball.Velocity = new Vector2(_ball.Velocity.X, MathF.Abs(_ball.Velocity.Y));
-                }
-                if (_ball.Bounds.Bottom < brick.Bounds.Bottom) {
-                    _ball.Velocity = new Vector2(_ball.Velocity.X, -MathF.Abs(_ball.Velocity.Y));
-                }
-                if (_ball.Bounds.Left > brick.Bounds.Right) {
-                    _ball.Velocity = new Vector2(MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
-                }
-                if (_ball.Bounds.Right < brick.Bounds.Left) {
-                    _ball.Velocity = new Vector2(-MathF.Abs(_ball.Velocity.X), _ball.Velocity.Y);
-                }
-                hittedBrick = brick;
-                break;
-            }
-        }
-        _bricks.Remove(hittedBrick);
-
-        if (_paddle.Bounds.Intersects(_ball.Bounds)) {
-            var isMovingToLeft = ks.IsKeyDown(Keys.A);
-            var isMovingToRight = ks.IsKeyDown(Keys.D);
-
-            float hitPos = MathHelper.Clamp((_ball.Bounds.Center.X - _paddle.Bounds.Center.X) / (_paddle.Bounds.Width / 2f), -1, 1);
-            float angleDeg = MathHelper.Lerp(-150f, -30f, (hitPos + 1f) / 2f);
-            currentDeg = angleDeg;
-            float angleRad = MathHelper.ToRadians(angleDeg);
-            float moveX = Math.Abs(MathF.Cos(angleRad));
-
-            if (isMovingToLeft) {
-                moveX = -Math.Abs(MathF.Cos(angleRad));
-            } else if (isMovingToRight) {
-                moveX = Math.Abs(MathF.Cos(angleRad));
-            }
-
-            _ball.Velocity = new Vector2(moveX, MathF.Sin(angleRad));
-            _ball.Position = new Vector2(_ball.Position.X, _paddle.Bounds.Top - _ball.Bounds.Height);
-        }
-
-        _ball.Position += _ball.Velocity * _ball.Speed * dt;
     }
 
     public override void Draw(GameTime gameTime)
@@ -242,7 +251,9 @@ public class GameScene : Scene
             block.Draw(SpriteBatch);
         }
 
-        _ball.Draw(SpriteBatch);
+        foreach (var ball in _balls) {
+            ball.Draw(SpriteBatch);
+        }
 
         _paddle.Draw(SpriteBatch);
 
@@ -272,12 +283,24 @@ public class GameScene : Scene
 
     private void ResetPositions()
     {
-        _ball.Position = new Vector2(_screenWidth / 2, (_screenHeight / 32) * 29);
+        GenerateBalls();
+
         _paddle.Position = new Vector2(_screenWidth / 2, (_screenHeight / 32) * 30);
         _lives -= 1;
 
         if (_lives <= 0) {
             _isGameOver = true;
+        }
+    }
+
+    private void GenerateBalls()
+    {
+        for (int i = 0; i < 2; i++) {
+            var ball = new Ball(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 29), new Vector2(16, 16));
+            ball.SpriteColor = Color.White;
+            ball.Speed = 400f + i * 50f;
+            ball.Velocity = Vector2.One;
+            _balls.Add(ball);
         }
     }
 }
