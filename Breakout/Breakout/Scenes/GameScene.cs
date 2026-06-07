@@ -40,10 +40,12 @@ public class GameScene : Scene
     private bool _isPause;
     private float _timerToUnpause;
     private bool _isGameOver;
+    private bool _youWon;
 
     private Panel _panel;
     private Text _gameOverText;
     private Button _restartButton;
+    private Text _youWonText;
 
     private List<PowerUp1> _powerUps1;
     private Color[] _powerUpsColors = { Color.Red, Color.Orange, Color.Yellow, Color.Green, Color.Purple, Color.Cyan };
@@ -71,6 +73,7 @@ public class GameScene : Scene
         _lives = 3;
         _isPause = false;
         _isGameOver = false;
+        _youWon = false;
 
         _balls = new List<Ball>();
         _powerUps1 = new List<PowerUp1>();
@@ -133,6 +136,10 @@ public class GameScene : Scene
         _gameOverText.Scale = Vector2.One;
         _gameOverText.Content = "GAMER OVER";
 
+        _youWonText = new Text(_spriteFont, new Vector2(200, 200));
+        _youWonText.Scale = Vector2.One;
+        _youWonText.Content = "YOU WON";
+
         _restartButton.OnClick = () => {
             SceneManager.ChangeScene(new GameScene(ContentManager, GraphicsDevice, SpriteBatch, SceneManager));
         };
@@ -145,11 +152,11 @@ public class GameScene : Scene
         // Exit();
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        if (_isGameOver) {
+        if (_isGameOver || _youWon) {
             _restartButton.Update();
         }
 
-        if (_isPause) {
+        if (_isPause || _youWon) {
             if (!_isGameOver) {
                 _timerToUnpause -= dt;
 
@@ -223,6 +230,11 @@ public class GameScene : Scene
             }
             _bricks.Remove(hittedBrick);
 
+            if (_bricks.Count == 0) {
+                _youWon = true;
+                _isPause = true;
+            }
+
             if (_paddle.Bounds.Intersects(ball.Bounds)) {
                 var isMovingToLeft = ks.IsKeyDown(Keys.A);
                 var isMovingToRight = ks.IsKeyDown(Keys.D);
@@ -295,6 +307,12 @@ public class GameScene : Scene
         if (_isGameOver) {
             _panel.Draw(SpriteBatch);
             _gameOverText.Draw(SpriteBatch);
+            _restartButton.Draw(SpriteBatch);
+        }
+
+        if (_youWon) {
+            _panel.Draw(SpriteBatch);
+            _youWonText.Draw(SpriteBatch);
             _restartButton.Draw(SpriteBatch);
         }
 
