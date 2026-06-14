@@ -209,16 +209,14 @@ public class GameScene : Scene
         } else if (ks.IsKeyDown(Keys.S) && currentDirection != "Up") {
             _newPosition = new Vector2(0, 1);
             _direction = "Down";
-        }
-
-        if (ks.IsKeyDown(Keys.A) && currentDirection != "Right") {
+        } else if (ks.IsKeyDown(Keys.A) && currentDirection != "Right") {
             _newPosition = new Vector2(-1, 0);
             _direction = "Left";
         } else if (ks.IsKeyDown(Keys.D) && currentDirection != "Left") {
             _newPosition = new Vector2(1, 0);
             _direction = "Right";
         }
-
+        
         if (_canMove) {
             for (int i = _bodies.Count - 1; i > 0; i--) {
                 _bodies[i].Position = _bodies[i - 1].Position;
