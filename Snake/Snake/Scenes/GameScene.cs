@@ -111,33 +111,27 @@ public class GameScene : Scene
         float ww = _screenWidth / 20;
         var isLight = true;
 
-        for (int i = 0; i < 19; i++)
-        {
+        for (int i = 0; i < 19; i++) {
             isLight = !isLight;
-            for (int j = 0; j < 10; j++)
-            {
+            for (int j = 0; j < 10; j++) {
                 var newTile = new Tile(_texture, new Vector2(32 + i * 64, 64 + j * 64), new Vector2(ww, ww));
                 if (isLight) {
-                    newTile.SpriteColor = new Color(15, 15, 15);
+                    newTile.SpriteColor = new Color(1, 1, 1);
                 } else {
-                    newTile.SpriteColor = new Color(35, 35, 35);
+                    newTile.SpriteColor = new Color(10, 10, 10);
                 }
                 isLight = !isLight;
 
                 _tiles.Add(newTile);
-            }   
+            }
         }
 
-        // _paddle = new Paddle(_texture, new Vector2(_screenWidth / 2, (_screenHeight / 32) * 30), new Vector2(paddleWidth, 16));
-        // _paddle.SpriteColor = Color.White;
-        // _paddle.Speed = 400f;
-
-        var body = new Body(_texture, new Vector2(128, 128), new Vector2(64, 64));
-        body.SpriteColor = new Color(240, 240, 240);
-        var body2 = new Body(_texture, new Vector2(128 - 64, 128), new Vector2(64, 64));
-        body2.SpriteColor = new Color(240, 240, 240);
-        var body3 = new Body(_texture, new Vector2(128 - 128, 128), new Vector2(64, 64));
-        body3.SpriteColor = new Color(240, 240, 240);
+        var body = new Body(_texture, new Vector2(32 + 64 * 9, 128), new Vector2(64, 64));
+        body.SpriteColor = new Color(108, 187, 60);
+        var body2 = new Body(_texture, new Vector2(32 + 64 * 9, 128), new Vector2(64, 64));
+        body2.SpriteColor = new Color(108, 187, 60);
+        var body3 = new Body(_texture, new Vector2(32 + 64 * 9, 128), new Vector2(64, 64));
+        body3.SpriteColor = new Color(108, 187, 60);
         _bodies.Add(body);
         _bodies.Add(body2);
         _bodies.Add(body3);
@@ -155,12 +149,8 @@ public class GameScene : Scene
         foreach (var wall in _walls) {
             wall.SpriteColor = Color.White;
         }
-        // _walls[1].SpriteColor = new Color(21, 21, 21);
 
         _spriteFont = ContentManager.Load<SpriteFont>("fonts/myfont");
-
-        // _heart = new Heart(_texture, new Vector2(32, 32), new Vector2(32, 32));
-        // _heart.SpriteColor = Color.DarkRed;
 
         _panel = new Panel(_texture, _spriteFont, new Rectangle((int)_usableScreenWidth, 32, (int)_usableScreenWidth * 2, (int)_usableScreenWidth * 2));
         _restartButton = new Button(_texture, _spriteFont, new Rectangle(200, 100, 100, 100), "Restart");
@@ -209,10 +199,9 @@ public class GameScene : Scene
             _canMove = true;
             _moveTimer = 0f;
         }
-        
+
         if (_canMove) {
-            for (int i = _bodies.Count - 1; i > 0; i--)
-            {
+            for (int i = _bodies.Count - 1; i > 0; i--) {
                 _bodies[i].Position = _bodies[i - 1].Position;
             }
             _bodies[0].Position += _newPosition * _speed;
@@ -244,15 +233,14 @@ public class GameScene : Scene
             _apple.Position = new Vector2(pos * 64, pos2 * 64);
 
             var body = new Body(_texture, _bodies[0].Position, new Vector2(64, 64));
-            body.SpriteColor = new Color(240, 240, 240);
+            body.SpriteColor = new Color(108, 187, 60);
             _bodies.Add(body);
         }
 
-        // if (_bodies[0].Bounds.Intersects)
-        foreach (var wall in _walls)
-        {
+        foreach (var wall in _walls) {
             if (_bodies[0].Bounds.Intersects(wall.Bounds)) {
                 _isGameOver = true;
+                _isPause = true;
             }
         }
     }
@@ -265,12 +253,11 @@ public class GameScene : Scene
             tile.Draw(SpriteBatch);
         }
 
-        foreach (var body in _bodies)
-        {
+        foreach (var body in _bodies) {
             body.Draw(SpriteBatch);
         }
 
-        _apple.Draw(SpriteBatch);        
+        _apple.Draw(SpriteBatch);
 
         foreach (var wall in _walls) {
             wall.Draw(SpriteBatch);

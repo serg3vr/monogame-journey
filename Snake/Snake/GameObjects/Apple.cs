@@ -11,14 +11,14 @@ public class Apple : Sprite
     public Vector2 Velocity { get; set; }
     public float Speed { get; set; }
 
-    private readonly Texture2D _heart;
+    private readonly Texture2D _texture;
 
     public Apple(Texture2D texture, Vector2 position, Vector2 size)
         : base(texture, position, size)
     {
         var w = (int)size.X;
         var h = (int)size.Y;
-        _heart = new Texture2D(texture.GraphicsDevice, w, h);
+        _texture = new Texture2D(texture.GraphicsDevice, w, h);
         var data = new Color[w * h];
 
         const int segments = 128;
@@ -28,10 +28,13 @@ public class Apple : Sprite
             var t = i * MathHelper.TwoPi / segments;
             var cosT = Math.Cos(t);
             var sinT = Math.Sin(t);
-            double r = 1 - 0.4 * sinT + 0.5 * cosT * cosT;
+            double r = 1.0;
+            r += 0.3 * cosT * cosT;
+            r -= 0.15 * sinT;
+            r -= 0.2 * Math.Pow(Math.Max(0.0, sinT), 6);
             rawVerts[i] = new Vector2(
-                (float)(r * 14 * cosT),
-                (float)(-(r * 18 * sinT)));
+                (float)(r * 15 * cosT),
+                (float)(-(r * 17 * sinT)));
         }
 
         var minX = float.MaxValue;
@@ -81,11 +84,13 @@ public class Apple : Sprite
             }
         }
 
-        _heart.SetData(data);
+        _texture.SetData(data);
     }
 
     public new void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(_heart, Bounds, SpriteColor);
+        var b = 1;
+        spriteBatch.Draw(_texture, new Rectangle((int)Position.X - b, (int)Position.Y - b, (int)Size.X + b * 2, (int)Size.Y + b * 2), Color.White);
+        spriteBatch.Draw(_texture, Bounds, SpriteColor);
     }
 }
