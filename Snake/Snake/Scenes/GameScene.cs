@@ -136,10 +136,11 @@ public class GameScene : Scene
         _bodies.Add(body2);
         _bodies.Add(body3);
 
-        float pos = _random.Next(19);
-        float pos2 = _random.Next(10);
-        _apple = new Apple(_texture, new Vector2(pos * 64, pos2 * 64), new Vector2(64, 64));
+        // float pos = _random.Next(19);
+        // float pos2 = _random.Next(10);
+        _apple = new Apple(_texture, new Vector2(0, 0), new Vector2(64, 64));
         _apple.SpriteColor = Color.DarkRed;
+        RepositionApple();
 
         _walls.Add(new Wall(_texture, new Vector2(32, 64), new Vector2(19 * 64, 2)));
         _walls.Add(new Wall(_texture, new Vector2(32, 64 + 10 * 64), new Vector2(19 * 64, 2)));
@@ -228,9 +229,7 @@ public class GameScene : Scene
         }
 
         if (_bodies[0].Bounds.Intersects(_apple.Bounds)) {
-            float pos = _random.Next(19);
-            float pos2 = _random.Next(10);
-            _apple.Position = new Vector2(pos * 64, pos2 * 64);
+            RepositionApple();
 
             var body = new Body(_texture, _bodies[0].Position, new Vector2(64, 64));
             body.SpriteColor = new Color(108, 187, 60);
@@ -266,7 +265,7 @@ public class GameScene : Scene
         // SpriteBatch.DrawString(_spriteFont, "Ball angle: " + currentDeg.ToString(), new Vector2(100, 100), Color.Red);
 
         // _heart.Draw(SpriteBatch);
-        SpriteBatch.DrawString(_spriteFont, _bodies.Count.ToString(), new Vector2(32, 16), Color.Red, 0f, Vector2.Zero, new Vector2(3f, 3f), SpriteEffects.None, 0f);
+        SpriteBatch.DrawString(_spriteFont, _bodies.Count.ToString(), new Vector2(32, 8), Color.Red, 0f, Vector2.Zero, new Vector2(3f, 3f), SpriteEffects.None, 0f);
 
         foreach (var powerUp in _powerUps1) {
             powerUp.Draw(SpriteBatch);
@@ -322,5 +321,12 @@ public class GameScene : Scene
         powerUp.Speed = 200f;
         powerUp.Velocity = new Vector2(0f, 1f);
         _powerUps1.Add(powerUp);
+    }
+
+    private void RepositionApple()
+    {
+        float pos = _random.Next(19);
+        float pos2 = _random.Next(10);
+        _apple.Position = new Vector2(32 + pos * 64, 64 + pos2 * 64);
     }
 }
