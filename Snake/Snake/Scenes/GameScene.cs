@@ -57,6 +57,7 @@ public class GameScene : Scene
     private Vector2 _newPosition;
     private float _speed = 64f;
     private Apple _apple;
+    private string _direction;
 
     public GameScene(
         ContentManager contentManager,
@@ -93,6 +94,7 @@ public class GameScene : Scene
         _moveTimer = 0f;
 
         _newPosition = new Vector2(1, 0);
+        _direction = "Right";
     }
 
     public override void LoadContent()
@@ -142,9 +144,9 @@ public class GameScene : Scene
         _apple.SpriteColor = Color.DarkRed;
         RepositionApple();
 
-        _walls.Add(new Wall(_texture, new Vector2(32, 64), new Vector2(19 * 64, 2)));
+        _walls.Add(new Wall(_texture, new Vector2(32, 62), new Vector2(19 * 64, 2)));
         _walls.Add(new Wall(_texture, new Vector2(32, 64 + 10 * 64), new Vector2(19 * 64, 2)));
-        _walls.Add(new Wall(_texture, new Vector2(32, 64), new Vector2(2, 10 * 64)));
+        _walls.Add(new Wall(_texture, new Vector2(30, 64), new Vector2(2, 10 * 64)));
         _walls.Add(new Wall(_texture, new Vector2(32 + 19 * 64, 64), new Vector2(2, 10 * 64)));
 
         foreach (var wall in _walls) {
@@ -192,13 +194,29 @@ public class GameScene : Scene
             return;
         }
 
-        // _paddle.Velocity = Vector2.Zero;
-
         _moveTimer += dt;
 
         if (_moveTimer >= 0.1f) {
             _canMove = true;
             _moveTimer = 0f;
+        }
+
+        var currentDirection = _direction;
+
+        if (ks.IsKeyDown(Keys.W) && currentDirection != "Down") {
+            _newPosition = new Vector2(0, -1);
+            _direction = "Up";
+        } else if (ks.IsKeyDown(Keys.S) && currentDirection != "Up") {
+            _newPosition = new Vector2(0, 1);
+            _direction = "Down";
+        }
+
+        if (ks.IsKeyDown(Keys.A) && currentDirection != "Right") {
+            _newPosition = new Vector2(-1, 0);
+            _direction = "Left";
+        } else if (ks.IsKeyDown(Keys.D) && currentDirection != "Left") {
+            _newPosition = new Vector2(1, 0);
+            _direction = "Right";
         }
 
         if (_canMove) {
@@ -207,25 +225,6 @@ public class GameScene : Scene
             }
             _bodies[0].Position += _newPosition * _speed;
             _canMove = false;
-        }
-
-        if (ks.IsKeyDown(Keys.W)) {
-            _newPosition = new Vector2(0, -1);
-            // _canMove = true;
-        }
-
-        if (ks.IsKeyDown(Keys.S)) {
-            _newPosition = new Vector2(0, 1);
-            // _canMove = true;
-        }
-
-        if (ks.IsKeyDown(Keys.A)) {
-            _newPosition = new Vector2(-1, 0);
-            // _canMove = true;
-        }
-
-        if (ks.IsKeyDown(Keys.D)) {
-            _newPosition = new Vector2(1, 0);
         }
 
         if (_bodies[0].Bounds.Intersects(_apple.Bounds)) {
