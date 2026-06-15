@@ -46,11 +46,19 @@ public class Button
     public void Draw(SpriteBatch spriteBatch)
     {
         // var prevCursor = MouseCursor.Arrow
+        var b = 1;
+        // spriteBatch.Draw(_texture, new Rectangle(_bounds.Top - b, _bounds.Left - b, _bounds.Width + b * 2, _bounds.Height + b * 2), Color.Red);
+
+
+        // spriteBatch.Draw(Texture, new Rectangle(Bounds.X + 2, Bounds.Y + 2, Bounds.Width - 4, Bounds.Height - 4), SpriteColor);
+
+        spriteBatch.Draw(_texture, _bounds, new Color(55, 71, 79));
+
         if (_hovered) {
-            spriteBatch.Draw(_texture, _bounds, Color.DarkGray);
+            spriteBatch.Draw(_texture, new Rectangle(_bounds.X + 2, _bounds.Y + 2, _bounds.Width - 4, _bounds.Height - 4), new Color(55, 71, 79));
             Mouse.SetCursor(MouseCursor.Hand);
         } else {
-            spriteBatch.Draw(_texture, _bounds, Color.White);
+            spriteBatch.Draw(_texture, new Rectangle(_bounds.X + 2, _bounds.Y + 2, _bounds.Width - 4, _bounds.Height - 4), new Color(38, 50, 56));
             Mouse.SetCursor(MouseCursor.Arrow);
         }
 
@@ -59,38 +67,7 @@ public class Button
             _bounds.Center.X - textSize.X / 2,
             _bounds.Center.Y - textSize.Y / 2
         );
-
-        spriteBatch.DrawString(_font, _name, textPosition, Color.Red);
+        
+        spriteBatch.DrawString(_font, _name, textPosition, Color.White);
     }
-
-    // public static Texture2D CreateRoundedRectTexture(GraphicsDevice graphicsDevice, int width, int height, int radius)
-    // {
-    //     var texture = new Texture2D(graphicsDevice, width, height);
-    //     var data = new Color[width * height];
-    //     int r2 = radius * radius;
-    //     int w = width - 1;
-    //     int h = height - 1;
-    //     for (int y = 0; y < height; y++) {
-    //         for (int x = 0; x < width; x++) {
-    //             int dx = 0, dy = 0;
-    //             if (x < radius && y < radius) {
-    //                 dx = x - radius;
-    //                 dy = y - radius;
-    //             } else if (x > w - radius && y < radius) {
-    //                 dx = x - (w - radius);
-    //                 dy = y - radius;
-    //             } else if (x < radius && y > h - radius) {
-    //                 dx = x - radius;
-    //                 dy = y - (h - radius);
-    //             } else if (x > w - radius && y > h - radius) {
-    //                 dx = x - (w - radius);
-    //                 dy = y - (h - radius);
-    //             }
-    //             bool inside = dx * dx + dy * dy <= r2;
-    //             data[y * width + x] = inside ? Color.White : Color.Transparent;
-    //         }
-    //     }
-    //     texture.SetData(data);
-    //     return texture;
-    // }
 }

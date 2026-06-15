@@ -59,6 +59,8 @@ public class GameScene : Scene
     private Apple _apple;
     private string _direction;
 
+    private SpriteFont _hudFont;
+
     public GameScene(
         ContentManager contentManager,
         GraphicsDevice graphicsDevice,
@@ -129,7 +131,7 @@ public class GameScene : Scene
         }
 
         var body = new Body(_texture, new Vector2(32 + 64 * 9, 128), new Vector2(64, 64));
-        body.SpriteColor = new Color(108, 187, 60);
+        body.SpriteColor = new Color(88, 187, 10);
         var body2 = new Body(_texture, new Vector2(32 + 64 * 9, 128), new Vector2(64, 64));
         body2.SpriteColor = new Color(108, 187, 60);
         var body3 = new Body(_texture, new Vector2(32 + 64 * 9, 128), new Vector2(64, 64));
@@ -154,16 +156,22 @@ public class GameScene : Scene
         }
 
         _spriteFont = ContentManager.Load<SpriteFont>("fonts/myfont");
+        _hudFont = ContentManager.Load<SpriteFont>("fonts/hud");
 
         _panel = new Panel(_texture, _spriteFont, new Rectangle((int)_usableScreenWidth, 32, (int)_usableScreenWidth * 2, (int)_usableScreenWidth * 2));
-        _restartButton = new Button(_texture, _spriteFont, new Rectangle(200, 100, 100, 100), "Restart");
+        _restartButton = new Button(_texture, _hudFont, new Rectangle(_screenWidth / 2 - 140 / 2, 240, 140, 60), "Restart");
 
-        _gameOverText = new Text(_spriteFont, new Vector2(200, 200));
-        _gameOverText.Scale = Vector2.One;
-        _gameOverText.Content = "GAMER OVER";
+        var scale = 2;
+        var text = "GAME OVER";
+        var stringSize = _hudFont.MeasureString(text) * scale;
+        _gameOverText = new Text(_hudFont, new Vector2(_screenWidth / 2 - stringSize.X / 2, 100));
+        _gameOverText.Scale = Vector2.One * scale;
+        _gameOverText.Content = text;
 
-        _youWonText = new Text(_spriteFont, new Vector2(200, 200));
-        _youWonText.Scale = Vector2.One;
+        text = "YOU WON";
+        stringSize = _hudFont.MeasureString(text) * scale;
+        _youWonText = new Text(_hudFont, new Vector2(_screenWidth / 2 - stringSize.X / 2, 100));
+        _youWonText.Scale = Vector2.One * scale;
         _youWonText.Content = "YOU WON";
 
         _restartButton.OnClick = () => {
@@ -201,22 +209,20 @@ public class GameScene : Scene
             _moveTimer = 0f;
         }
 
-        var currentDirection = _direction;
-
-        if (ks.IsKeyDown(Keys.W) && currentDirection != "Down") {
+        if (ks.IsKeyDown(Keys.W) && _direction != "Down") {
             _newPosition = new Vector2(0, -1);
             _direction = "Up";
-        } else if (ks.IsKeyDown(Keys.S) && currentDirection != "Up") {
+        } else if (ks.IsKeyDown(Keys.S) && _direction != "Up") {
             _newPosition = new Vector2(0, 1);
             _direction = "Down";
-        } else if (ks.IsKeyDown(Keys.A) && currentDirection != "Right") {
+        } else if (ks.IsKeyDown(Keys.A) && _direction != "Right") {
             _newPosition = new Vector2(-1, 0);
             _direction = "Left";
-        } else if (ks.IsKeyDown(Keys.D) && currentDirection != "Left") {
+        } else if (ks.IsKeyDown(Keys.D) && _direction != "Left") {
             _newPosition = new Vector2(1, 0);
             _direction = "Right";
         }
-        
+
         if (_canMove) {
             for (int i = _bodies.Count - 1; i > 0; i--) {
                 _bodies[i].Position = _bodies[i - 1].Position;
@@ -231,6 +237,13 @@ public class GameScene : Scene
             var body = new Body(_texture, _bodies[0].Position, new Vector2(64, 64));
             body.SpriteColor = new Color(108, 187, 60);
             _bodies.Add(body);
+        }
+
+        for (int i = 1; i < _bodies.Count - 1; i++) {
+            if (_bodies[0].Bounds.Intersects(_bodies[i].Bounds)) {
+                _isGameOver = true;
+                _isPause = true;
+            }
         }
 
         foreach (var wall in _walls) {

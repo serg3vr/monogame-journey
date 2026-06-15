@@ -50,7 +50,7 @@ public class Panel
         //     spriteBatch.Draw(_texture, _bounds, Color.White);
         //     Mouse.SetCursor(MouseCursor.Arrow);
         // }
-
-        spriteBatch.Draw(_texture, _bounds, new Color(10, 10, 10, 200));
+        spriteBatch.Draw(_texture, new Rectangle(_bounds.X + 2, _bounds.Y + 2, _bounds.Width - 4, _bounds.Height - 4), new Color(10, 10, 10, 100));
+        spriteBatch.Draw(_texture, _bounds, new Color(10, 10, 10, 100));
     }
 }
