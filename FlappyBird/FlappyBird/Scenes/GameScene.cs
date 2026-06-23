@@ -13,7 +13,8 @@ namespace FlappyBird;
 public class GameScene : Scene
 {
     private static readonly Random _random = new();
-    private const float GRAVITY = 9.81f;
+    private const float GRAVITY = 1000f;
+    private const float IMPULSE = 650f;
 
     private int _screenWidth;
     private int _screenHeight;
@@ -77,25 +78,15 @@ public class GameScene : Scene
 
     public override void Initialize()
     {
-        // TODO: Add your initialization logic here
         _screenWidth = GraphicsDevice.Viewport.Width;
         _screenHeight = GraphicsDevice.Viewport.Height;
 
         _usableScreenWidth = _screenWidth / 4f;
 
-        // _bricks = new List<Brick>();
-        // _walls = new List<Wall>();
-
         _lives = 3;
         _isPause = false;
         _isGameOver = false;
         _youWon = false;
-
-        // _balls = new List<Ball>();
-        // _powerUps1 = new List<PowerUp1>();
-
-        // _tiles = new List<Tile>();
-        // _bodies = new List<Body>();
 
         _canMove = true;
         _moveTimer = 0f;
@@ -118,47 +109,6 @@ public class GameScene : Scene
         float paddleWidth = blockWidth * 1.5f;
 
         float ww = _screenWidth / 20;
-        var isLight = true;
-
-        // for (int i = 0; i < 19; i++) {
-        //     isLight = !isLight;
-        //     for (int j = 0; j < 10; j++) {
-        //         var newTile = new Tile(_texture, new Vector2(32 + i * 64, 64 + j * 64), new Vector2(ww, ww));
-        //         if (isLight) {
-        //             newTile.SpriteColor = new Color(1, 1, 1);
-        //         } else {
-        //             newTile.SpriteColor = new Color(10, 10, 10);
-        //         }
-        //         isLight = !isLight;
-
-        //         _tiles.Add(newTile);
-        //     }
-        // }
-
-        var body = new Body(_texture, new Vector2(32 + 64 * 9, 128), new Vector2(64, 64));
-        body.SpriteColor = new Color(88, 187, 10);
-        var body2 = new Body(_texture, new Vector2(32 + 64 * 9, 128), new Vector2(64, 64));
-        body2.SpriteColor = new Color(108, 187, 60);
-        var body3 = new Body(_texture, new Vector2(32 + 64 * 9, 128), new Vector2(64, 64));
-        body3.SpriteColor = new Color(108, 187, 60);
-        // _bodies.Add(body);
-        // _bodies.Add(body2);
-        // _bodies.Add(body3);
-
-        // float pos = _random.Next(19);
-        // float pos2 = _random.Next(10);
-        // _apple = new Apple(_texture, new Vector2(0, 0), new Vector2(64, 64));
-        // _apple.SpriteColor = Color.DarkRed;
-        // RepositionApple();
-
-        // _walls.Add(new Wall(_texture, new Vector2(32, 62), new Vector2(19 * 64, 2)));
-        // _walls.Add(new Wall(_texture, new Vector2(32, 64 + 10 * 64), new Vector2(19 * 64, 2)));
-        // _walls.Add(new Wall(_texture, new Vector2(30, 64), new Vector2(2, 10 * 64)));
-        // _walls.Add(new Wall(_texture, new Vector2(32 + 19 * 64, 64), new Vector2(2, 10 * 64)));
-
-        // foreach (var wall in _walls) {
-        //     wall.SpriteColor = Color.White;
-        // }
 
         _spriteFont = ContentManager.Load<SpriteFont>("fonts/ingame");
         _hudFont = ContentManager.Load<SpriteFont>("fonts/hud");
@@ -191,8 +141,6 @@ public class GameScene : Scene
     public override void Update(GameTime gameTime)
     {
         KeyboardState ks = Keyboard.GetState();
-        // if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-        // Exit();
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         if (_isGameOver || _youWon) {
@@ -220,10 +168,14 @@ public class GameScene : Scene
 
 
         if (ks.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space)) {
-            _bird.Velocity += new Vector2(0, -1000f);
+            _bird.Velocity = new Vector2(0, -IMPULSE);
         }
 
-        _bird.Velocity += new Vector2(0, GRAVITY);
+        _bird.Velocity += new Vector2(0, GRAVITY * dt);
+        _bird.Velocity = new Vector2(
+            _bird.Velocity.X,
+            Math.Clamp(_bird.Velocity.Y, -IMPULSE, 1000f)
+        );
         _bird.Position += _bird.Velocity * _bird.Speed * dt;
         
         _previousKeyboardState = ks;
