@@ -17,8 +17,8 @@ public class Game1 : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        _graphics.PreferredBackBufferWidth = 1280;
-        _graphics.PreferredBackBufferHeight = 720;
+        _graphics.PreferredBackBufferWidth = 360;
+        _graphics.PreferredBackBufferHeight = 640;
 
         _graphics.ApplyChanges();
     }

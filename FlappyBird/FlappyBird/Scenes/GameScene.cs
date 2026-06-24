@@ -67,6 +67,8 @@ public class GameScene : Scene
 
     private KeyboardState _previousKeyboardState;
 
+    private List<Pipe> _pipes;
+
     public GameScene(
         ContentManager contentManager,
         GraphicsDevice graphicsDevice,
@@ -93,6 +95,8 @@ public class GameScene : Scene
 
         _newPosition = new Vector2(1, 0);
         _direction = "Right";
+
+        _pipes = new List<Pipe>();
     }
 
     public override void LoadContent()
@@ -127,7 +131,7 @@ public class GameScene : Scene
         stringSize = _hudFont.MeasureString(text) * scale;
         _youWonText = new Text(_hudFont, new Vector2(_screenWidth / 2 - stringSize.X / 2, 100));
         _youWonText.Scale = Vector2.One * scale;
-        _youWonText.Content = "YOU WON";
+        _youWonText.Content = text;
 
         _restartButton.OnClick = () => {
             SceneManager.ChangeScene(new GameScene(ContentManager, GraphicsDevice, SpriteBatch, SceneManager));
@@ -136,6 +140,15 @@ public class GameScene : Scene
         _bird = new Body(_texture, new Vector2(100, 100), new Vector2(64, 64));
         _bird.SpriteColor = Color.Yellow;
         _bird.Speed = 1f;
+
+        var pipe1 = new Pipe(_texture, new Vector2(100, 0), new Vector2(64, 64));
+        var pipe2 = new Pipe(_texture, new Vector2(200, 0), new Vector2(64, 64));
+        var pipe3 = new Pipe(_texture, new Vector2(300, 0), new Vector2(64, 64));
+        var pipe4 = new Pipe(_texture, new Vector2(400, 0), new Vector2(64, 64));
+        _pipes.Add(pipe1);
+        _pipes.Add(pipe2);
+        _pipes.Add(pipe3);
+        _pipes.Add(pipe4);
     }
 
     public override void Update(GameTime gameTime)
@@ -177,7 +190,12 @@ public class GameScene : Scene
             Math.Clamp(_bird.Velocity.Y, -IMPULSE, 1000f)
         );
         _bird.Position += _bird.Velocity * _bird.Speed * dt;
-        
+
+
+        foreach (var pipe in _pipes) {
+            pipe.Update(gameTime);
+        }
+
         _previousKeyboardState = ks;
     }
 
@@ -186,6 +204,10 @@ public class GameScene : Scene
         SpriteBatch.Begin();
 
         _bird.Draw(SpriteBatch);
+
+        foreach (var pipe in _pipes) {
+            pipe.Draw(SpriteBatch);
+        }
 
         if (_isGameOver) {
             _panel.Draw(SpriteBatch);
