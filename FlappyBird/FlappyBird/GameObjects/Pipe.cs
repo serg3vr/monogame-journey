@@ -20,19 +20,19 @@ public class Pipe : Sprite
         Speed = 100f;
     }
 
-    public new void Draw(SpriteBatch spriteBatch)
-    {
-        spriteBatch.Draw(Texture, Bounds, _border);
-        spriteBatch.Draw(Texture, new Rectangle(Bounds.X + 2, Bounds.Y + 2, Bounds.Width - 4, Bounds.Height - 4), SpriteColor);
-    }
-
     public void Update(GameTime gameTime)
     {
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
         Position += Velocity * Speed * dt;
 
-        if (Position.X < 0) {
-            Position = new Vector2(Globals.ScreenWidth, Position.Y);
-        }
+        // if (Position.X < 0) {
+        //     Position = new Vector2(Globals.ScreenWidth, Position.Y);
+        // }
+    }
+
+    public new void Draw(SpriteBatch spriteBatch)
+    {
+        spriteBatch.Draw(Texture, Bounds, _border);
+        spriteBatch.Draw(Texture, new Rectangle(Bounds.X + 2, Bounds.Y + 2, Bounds.Width - 4, Bounds.Height - 4), SpriteColor);
     }
 }

@@ -14,8 +14,8 @@ namespace FlappyBird;
 public class GameScene : Scene
 {
     private static readonly Random _random = new();
-    private const float GRAVITY = 1000f;
-    private const float IMPULSE = 650f;
+    private const float GRAVITY = 1200f;
+    private const float IMPULSE = 550f;
 
     private float _usableScreenWidth;
 
@@ -145,16 +145,18 @@ public class GameScene : Scene
         var otherSize = 11 - size - 3;
 
         var pipe1 = new Pipe(_texture, new Vector2(100, 0), new Vector2(64, size * 64));
+        pipe1.SpriteColor = Color.Green;
         var pipe2 = new Pipe(_texture, new Vector2(100, Globals.ScreenHeight - otherSize * 64), new Vector2(64, otherSize * 64));
-        pipe2.SpriteColor = Color.Red;
+        pipe2.SpriteColor = Color.Green;
         _pipes.Add(pipe1);
         _pipes.Add(pipe2);
 
         size = _random.Next(3, 6);
         otherSize = 11 - size - 3;
 
-        var pipe3 = new Pipe(_texture, new Vector2(270, 0), new Vector2(64, size * 64));
-        var pipe4 = new Pipe(_texture, new Vector2(270, Globals.ScreenHeight - otherSize * 64), new Vector2(64, otherSize * 64));
+        var pipe3 = new Pipe(_texture, new Vector2(356, 0), new Vector2(64, size * 64));
+        pipe3.SpriteColor = Color.Green;
+        var pipe4 = new Pipe(_texture, new Vector2(356, Globals.ScreenHeight - otherSize * 64), new Vector2(64, otherSize * 64));
         pipe4.SpriteColor = Color.Green;
         _pipes.Add(pipe4);
         _pipes.Add(pipe3);
@@ -203,6 +205,30 @@ public class GameScene : Scene
 
         foreach (var pipe in _pipes) {
             pipe.Update(gameTime);
+        }
+
+        if (_pipes[0].Bounds.Right < 0) {
+            // 1,2,3,4,5,6,7,8,9,10,11
+            // 1,2,0,0,0,6,7,8,9,10,11
+            // 1,2,3,4,5,6,0,0,0,10,11
+
+            var size = _random.Next(2, 7);
+            var otherSize = 11 - size - 3;
+            _pipes[0].Position = new Vector2(Globals.ScreenWidth + _pipes[0].Bounds.Width, 0);
+            _pipes[0].Size = new Vector2(64, size * 64);
+
+            _pipes[1].Position = new Vector2(Globals.ScreenWidth + _pipes[1].Bounds.Width, Globals.ScreenHeight - otherSize * 64);
+            _pipes[1].Size = new Vector2(64, otherSize * 64);
+        }
+
+        if (_pipes[2].Bounds.Right < 0) {
+            var size = _random.Next(2, 7);
+            var otherSize = 11 - size - 3;
+            _pipes[2].Position = new Vector2(Globals.ScreenWidth + _pipes[2].Bounds.Width, 0);
+            _pipes[2].Size = new Vector2(64, size * 64);
+
+            _pipes[3].Position = new Vector2(Globals.ScreenWidth + _pipes[3].Bounds.Width, Globals.ScreenHeight - otherSize * 64);
+            _pipes[3].Size = new Vector2(64, otherSize * 64);
         }
 
         _previousKeyboardState = ks;

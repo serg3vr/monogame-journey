@@ -19,6 +19,6 @@ public class Body : Sprite
     public new void Draw(SpriteBatch spriteBatch)
     {
         spriteBatch.Draw(Texture, Bounds, _border);
-        spriteBatch.Draw(Texture, new Rectangle(Bounds.X + 2, Bounds.Y + 2, Bounds.Width - 4, Bounds.Height - 4), SpriteColor);
+        spriteBatch.Draw(Texture, new Rectangle(Bounds.X + 2, Bounds.Y + 2, Bounds.Width - 4, Bounds.Height - 4), SpriteColor); 
     }
 }
