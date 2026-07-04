@@ -20,7 +20,6 @@ public class Pipe : Sprite
         Speed = 100f;
     }
 
-
     public new void Draw(SpriteBatch spriteBatch)
     {
         spriteBatch.Draw(Texture, Bounds, _border);
@@ -33,7 +32,7 @@ public class Pipe : Sprite
         Position += Velocity * Speed * dt;
 
         if (Position.X < 0) {
-            Position = new Vector2(Globals.ScreenWidth);
+            Position = new Vector2(Globals.ScreenWidth, Position.Y);
         }
     }
 }

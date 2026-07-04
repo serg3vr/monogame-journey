@@ -67,6 +67,8 @@ public class GameScene : Scene
     private KeyboardState _previousKeyboardState;
 
     private List<Pipe> _pipes;
+    // private PipesColumn _column1;
+    // private PipesColumn _column2;
 
     public GameScene(
         ContentManager contentManager,
@@ -93,6 +95,8 @@ public class GameScene : Scene
         _direction = "Right";
 
         _pipes = new List<Pipe>();
+        // _column1 = new PipesColumn();
+        // _column2 = new PipesColumn();
     }
 
     public override void LoadContent()
@@ -133,14 +137,27 @@ public class GameScene : Scene
             SceneManager.ChangeScene(new GameScene(ContentManager, GraphicsDevice, SpriteBatch, SceneManager));
         };
 
-        _bird = new Body(_texture, new Vector2(100, 100), new Vector2(64, 64));
+        _bird = new Body(_texture, new Vector2(100, 100), new Vector2(32, 32));
         _bird.SpriteColor = Color.Yellow;
         _bird.Speed = 1f;
 
-        var pipe1 = new Pipe(_texture, new Vector2(100, 0), new Vector2(64, 64));
-        var pipe2 = new Pipe(_texture, new Vector2(300, 0), new Vector2(64, 64));
+        var size = _random.Next(3, 6);
+        var otherSize = 11 - size - 3;
+
+        var pipe1 = new Pipe(_texture, new Vector2(100, 0), new Vector2(64, size * 64));
+        var pipe2 = new Pipe(_texture, new Vector2(100, Globals.ScreenHeight - otherSize * 64), new Vector2(64, otherSize * 64));
+        pipe2.SpriteColor = Color.Red;
         _pipes.Add(pipe1);
         _pipes.Add(pipe2);
+
+        size = _random.Next(3, 6);
+        otherSize = 11 - size - 3;
+
+        var pipe3 = new Pipe(_texture, new Vector2(270, 0), new Vector2(64, size * 64));
+        var pipe4 = new Pipe(_texture, new Vector2(270, Globals.ScreenHeight - otherSize * 64), new Vector2(64, otherSize * 64));
+        pipe4.SpriteColor = Color.Green;
+        _pipes.Add(pipe4);
+        _pipes.Add(pipe3);
     }
 
     public override void Update(GameTime gameTime)
