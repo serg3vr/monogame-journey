@@ -1,4 +1,5 @@
 using System;
+using FlappyBird.Core;
 using FlappyBird.Graphics.Core;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -15,8 +16,8 @@ public class Pipe : Sprite
     : base(texture, position, size)
     {
         _border =  new Color(255, 255, 255);
-        Velocity = new Vector2(1, 0);
-        Speed = 200f;
+        Velocity = new Vector2(-1, 0);
+        Speed = 100f;
     }
 
 
@@ -30,5 +31,9 @@ public class Pipe : Sprite
     {
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
         Position += Velocity * Speed * dt;
+
+        if (Position.X < 0) {
+            Position = new Vector2(Globals.ScreenWidth);
+        }
     }
 }

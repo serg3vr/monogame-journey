@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using FlappyBird.Core;
 using FlappyBird.Core.Scenes;
 
 namespace FlappyBird;
@@ -25,6 +26,9 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
+        Globals.ScreenWidth = _graphics.PreferredBackBufferWidth;
+        Globals.ScreenHeight = _graphics.PreferredBackBufferHeight;
+
         _sceneManager = new SceneManager();
 
         base.Initialize();

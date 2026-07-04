@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using FlappyBird.Core;
 using FlappyBird.Core.Scenes;
 using FlappyBird.GameObjects;
 using System.Collections.Generic;
@@ -16,8 +17,6 @@ public class GameScene : Scene
     private const float GRAVITY = 1000f;
     private const float IMPULSE = 650f;
 
-    private int _screenWidth;
-    private int _screenHeight;
     private float _usableScreenWidth;
 
     private Texture2D _texture;
@@ -80,10 +79,7 @@ public class GameScene : Scene
 
     public override void Initialize()
     {
-        _screenWidth = GraphicsDevice.Viewport.Width;
-        _screenHeight = GraphicsDevice.Viewport.Height;
-
-        _usableScreenWidth = _screenWidth / 4f;
+        _usableScreenWidth = Globals.ScreenWidth / 4f;
 
         _lives = 3;
         _isPause = false;
@@ -112,24 +108,24 @@ public class GameScene : Scene
 
         float paddleWidth = blockWidth * 1.5f;
 
-        float ww = _screenWidth / 20;
+        float ww = Globals.ScreenWidth / 20;
 
         _spriteFont = ContentManager.Load<SpriteFont>("fonts/ingame");
         _hudFont = ContentManager.Load<SpriteFont>("fonts/hud");
 
         _panel = new Panel(_texture, _spriteFont, new Rectangle((int)_usableScreenWidth, 32, (int)_usableScreenWidth * 2, (int)_usableScreenWidth * 2));
-        _restartButton = new Button(_texture, _hudFont, new Rectangle(_screenWidth / 2 - 140 / 2, 240, 140, 60), "Restart");
+        _restartButton = new Button(_texture, _hudFont, new Rectangle(Globals.ScreenWidth / 2 - 140 / 2, 240, 140, 60), "Restart");
 
         var scale = 2;
         var text = "GAME OVER";
         var stringSize = _hudFont.MeasureString(text) * scale;
-        _gameOverText = new Text(_hudFont, new Vector2(_screenWidth / 2 - stringSize.X / 2, 100));
+        _gameOverText = new Text(_hudFont, new Vector2(Globals.ScreenWidth / 2 - stringSize.X / 2, 100));
         _gameOverText.Scale = Vector2.One * scale;
         _gameOverText.Content = text;
 
         text = "YOU WON";
         stringSize = _hudFont.MeasureString(text) * scale;
-        _youWonText = new Text(_hudFont, new Vector2(_screenWidth / 2 - stringSize.X / 2, 100));
+        _youWonText = new Text(_hudFont, new Vector2(Globals.ScreenWidth / 2 - stringSize.X / 2, 100));
         _youWonText.Scale = Vector2.One * scale;
         _youWonText.Content = text;
 
@@ -142,13 +138,9 @@ public class GameScene : Scene
         _bird.Speed = 1f;
 
         var pipe1 = new Pipe(_texture, new Vector2(100, 0), new Vector2(64, 64));
-        var pipe2 = new Pipe(_texture, new Vector2(200, 0), new Vector2(64, 64));
-        var pipe3 = new Pipe(_texture, new Vector2(300, 0), new Vector2(64, 64));
-        var pipe4 = new Pipe(_texture, new Vector2(400, 0), new Vector2(64, 64));
+        var pipe2 = new Pipe(_texture, new Vector2(300, 0), new Vector2(64, 64));
         _pipes.Add(pipe1);
         _pipes.Add(pipe2);
-        _pipes.Add(pipe3);
-        _pipes.Add(pipe4);
     }
 
     public override void Update(GameTime gameTime)
