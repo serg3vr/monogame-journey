@@ -16,6 +16,7 @@ public class GameScene : Scene
     private static readonly Random _random = new();
     private const float GRAVITY = 1500f;
     private const float IMPULSE = 480f;
+    private const float PIPE_WIDTH = 52f;
 
     private float _usableScreenWidth;
 
@@ -69,6 +70,8 @@ public class GameScene : Scene
     private List<Pipe> _pipes;
     // private PipesColumn _column1;
     // private PipesColumn _column2;
+    private int _score = 0;
+    private Text _scoreText;
 
     public GameScene(
         ContentManager contentManager,
@@ -146,9 +149,9 @@ public class GameScene : Scene
 
         var initialX = 256;
 
-        var pipe1 = new Pipe(_texture, new Vector2(initialX + 100, 0), new Vector2(64, size * 64));
+        var pipe1 = new Pipe(_texture, new Vector2(initialX + 100, 0), new Vector2(PIPE_WIDTH, size * 64));
         pipe1.SpriteColor = Color.Green;
-        var pipe2 = new Pipe(_texture, new Vector2(initialX + 100, Globals.ScreenHeight - otherSize * 64), new Vector2(64, otherSize * 64));
+        var pipe2 = new Pipe(_texture, new Vector2(initialX + 100, Globals.ScreenHeight - otherSize * 64), new Vector2(PIPE_WIDTH, otherSize * 64));
         pipe2.SpriteColor = Color.Green;
         _pipes.Add(pipe1);
         _pipes.Add(pipe2);
@@ -156,12 +159,16 @@ public class GameScene : Scene
         size = GetNextGap();
         otherSize = 11 - size - 3;
 
-        var pipe3 = new Pipe(_texture, new Vector2(initialX + 356, 0), new Vector2(64, size * 64));
+        var pipe3 = new Pipe(_texture, new Vector2(initialX + 356, 0), new Vector2(PIPE_WIDTH, size * 64));
         pipe3.SpriteColor = Color.Green;
-        var pipe4 = new Pipe(_texture, new Vector2(initialX + 356, Globals.ScreenHeight - otherSize * 64), new Vector2(64, otherSize * 64));
+        var pipe4 = new Pipe(_texture, new Vector2(initialX + 356, Globals.ScreenHeight - otherSize * 64), new Vector2(PIPE_WIDTH, otherSize * 64));
         pipe4.SpriteColor = Color.Green;
         _pipes.Add(pipe4);
         _pipes.Add(pipe3);
+
+        _scoreText = new Text(_hudFont, new Vector2(Globals.ScreenWidth /2, 100));
+        _scoreText.Scale = Vector2.One * scale;
+        _scoreText.Content = _score.ToString();
     }
 
     public override void Update(GameTime gameTime)
@@ -213,20 +220,20 @@ public class GameScene : Scene
             var size = GetNextGap();
             var otherSize = 11 - size - 3;
             _pipes[0].Position = new Vector2(Globals.ScreenWidth + _pipes[0].Bounds.Width, 0);
-            _pipes[0].Size = new Vector2(64, size * 64);
+            _pipes[0].Size = new Vector2(PIPE_WIDTH, size * 64);
 
             _pipes[1].Position = new Vector2(Globals.ScreenWidth + _pipes[1].Bounds.Width, Globals.ScreenHeight - otherSize * 64);
-            _pipes[1].Size = new Vector2(64, otherSize * 64);
+            _pipes[1].Size = new Vector2(PIPE_WIDTH, otherSize * 64);
         }
 
         if (_pipes[2].Bounds.Right < 0) {
             var size = GetNextGap();
             var otherSize = 11 - size - 3;
             _pipes[2].Position = new Vector2(Globals.ScreenWidth + _pipes[2].Bounds.Width, 0);
-            _pipes[2].Size = new Vector2(64, size * 64);
+            _pipes[2].Size = new Vector2(PIPE_WIDTH, size * 64);
 
             _pipes[3].Position = new Vector2(Globals.ScreenWidth + _pipes[3].Bounds.Width, Globals.ScreenHeight - otherSize * 64);
-            _pipes[3].Size = new Vector2(64, otherSize * 64);
+            _pipes[3].Size = new Vector2(PIPE_WIDTH, otherSize * 64);
         }
 
         var wasCollision = false;
@@ -243,7 +250,18 @@ public class GameScene : Scene
         }
 
         if (wasCollision) {
+            _isPause = true;
             _isGameOver = true;
+        }
+
+
+        foreach (var pipe in _pipes) {
+            if (_bird.Bounds.Left > pipe.Bounds.Right && pipe.IsScoreable) {
+                pipe.IsScoreable = false;
+                _score += 1;
+                _scoreText.Content = (_score / 2).ToString();
+                break; // Only need pass 1/4
+            }
         }
 
         _previousKeyboardState = ks;
@@ -270,6 +288,8 @@ public class GameScene : Scene
             _youWonText.Draw(SpriteBatch);
             _restartButton.Draw(SpriteBatch);
         }
+
+        _scoreText.Draw(SpriteBatch);
 
         SpriteBatch.End();
     }

@@ -11,6 +11,7 @@ public class Pipe : Sprite
     public Vector2 Velocity { get; set; }
     public float Speed { get; set; }
     private Color _border;
+    public bool IsScoreable { get; set; }
 
     public Pipe(Texture2D texture, Vector2 position, Vector2 size)
     : base(texture, position, size)
@@ -18,6 +19,7 @@ public class Pipe : Sprite
         _border =  new Color(255, 255, 255);
         Velocity = new Vector2(-1, 0);
         Speed = 100f;
+        IsScoreable = true;
     }
 
     public void Update(GameTime gameTime)
@@ -28,6 +30,10 @@ public class Pipe : Sprite
         // if (Position.X < 0) {
         //     Position = new Vector2(Globals.ScreenWidth, Position.Y);
         // }
+
+        if (Bounds.Right < 0) {
+            IsScoreable = true;
+        }
     }
 
     public new void Draw(SpriteBatch spriteBatch)
