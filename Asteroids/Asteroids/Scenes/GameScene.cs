@@ -14,17 +14,9 @@ namespace Asteroids.Scenes;
 public class GameScene : Scene
 {
     private static readonly Random _random = new();
-    private const float GRAVITY = 1500f;
-    private const float IMPULSE = 480f;
-    private const float PIPE_WIDTH = 52f;
-
     private float _usableScreenWidth;
 
     private Texture2D _texture;
-
-    private const float RECT_WIDTH = 16;
-
-
     private SpriteFont _smallFont;
 
     private bool _isPause;
@@ -41,20 +33,15 @@ public class GameScene : Scene
 
     private bool _canMove;
     private float _moveTimer;
-    private Vector2 _newPosition;
-    private float _speed = 64f;
-    // private Apple _apple;
-    private string _direction;
-
     private SpriteFont _mediumFont;
 
-    private Body _bird;
+    private Spaceship _spaceship;
 
     private KeyboardState _previousKeyboardState;
-
-    private List<Pipe> _pipes;
     private int _score = 0;
     private Text _scoreText;
+
+    private Texture2D _spaceshipSprite;
 
     public GameScene(
         ContentManager contentManager,
@@ -72,32 +59,12 @@ public class GameScene : Scene
         _isPause = false;
         _isGameOver = false;
         _youWon = false;
-
-        _canMove = true;
-        _moveTimer = 0f;
-
-        _newPosition = new Vector2(1, 0);
-        _direction = "Right";
-
-        _pipes = new List<Pipe>();
-        // _column1 = new PipesColumn();
-        // _column2 = new PipesColumn();
     }
 
     public override void LoadContent()
     {
         _texture = new Texture2D(GraphicsDevice, 1, 1);
         _texture.SetData(new[] { Color.White });
-
-        float blockWidth = (_usableScreenWidth - 16f) * 2f / 13f;
-        float blockSpace = blockWidth / 14f;
-
-        float startingPointX = _usableScreenWidth + RECT_WIDTH + blockSpace;
-        float startingPointY = RECT_WIDTH * 7 + blockSpace;
-
-        float paddleWidth = blockWidth * 1.5f;
-
-        float ww = Globals.ScreenWidth / 20;
 
         _smallFont = ContentManager.Load<SpriteFont>("fonts/small");
         _mediumFont = ContentManager.Load<SpriteFont>("fonts/medium");
@@ -122,31 +89,12 @@ public class GameScene : Scene
             SceneManager.ChangeScene(new GameScene(ContentManager, GraphicsDevice, SpriteBatch, SceneManager));
         };
 
-        _bird = new Body(_texture, new Vector2(100, 100), new Vector2(32, 32));
-        _bird.SpriteColor = Color.Yellow;
-        _bird.Speed = 1f;
-
-        var size = GetNextGap();
-        var otherSize = 11 - size - 3;
-
-        var initialX = 256;
-
-        var pipe1 = new Pipe(_texture, new Vector2(initialX + 100, 0), new Vector2(PIPE_WIDTH, size * 64));
-        pipe1.SpriteColor = Color.Green;
-        var pipe2 = new Pipe(_texture, new Vector2(initialX + 100, Globals.ScreenHeight - otherSize * 64), new Vector2(PIPE_WIDTH, otherSize * 64));
-        pipe2.SpriteColor = Color.Green;
-        _pipes.Add(pipe1);
-        _pipes.Add(pipe2);
-
-        size = GetNextGap();
-        otherSize = 11 - size - 3;
-
-        var pipe3 = new Pipe(_texture, new Vector2(initialX + 356, 0), new Vector2(PIPE_WIDTH, size * 64));
-        pipe3.SpriteColor = Color.Green;
-        var pipe4 = new Pipe(_texture, new Vector2(initialX + 356, Globals.ScreenHeight - otherSize * 64), new Vector2(PIPE_WIDTH, otherSize * 64));
-        pipe4.SpriteColor = Color.Green;
-        _pipes.Add(pipe4);
-        _pipes.Add(pipe3);
+        _spaceshipSprite = ContentManager.Load<Texture2D>("images/Spaceship");
+        _spaceship = new Spaceship(
+            _spaceshipSprite,
+            new Vector2(Globals.ScreenWidth / 2 - 64 / 2, Globals.ScreenHeight / 2 - 32 / 2)
+        );
+        _spaceship.Speed = 1f;
 
         _scoreText = new Text(_mediumFont, new Vector2(Globals.ScreenWidth /2, 100));
         _scoreText.Scale = Vector2.One * scale;
@@ -181,70 +129,17 @@ public class GameScene : Scene
             _moveTimer = 0f;
         }
 
+        // var spacePressedOneTime = ks.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space);
+        // if (spacePressedOneTime) {
+        //     _bird.Velocity = new Vector2(0, -IMPULSE);
+        // }
 
-        if (ks.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space)) {
-            _bird.Velocity = new Vector2(0, -IMPULSE);
-        }
-
-        _bird.Velocity += new Vector2(0, GRAVITY * dt);
-        _bird.Velocity = new Vector2(
-            _bird.Velocity.X,
-            Math.Clamp(_bird.Velocity.Y, -IMPULSE, 1000f)
-        );
-        _bird.Position += _bird.Velocity * _bird.Speed * dt;
-
-
-        foreach (var pipe in _pipes) {
-            pipe.Update(gameTime);
-        }
-
-        if (_pipes[0].Bounds.Right < 0) {
-            var size = GetNextGap();
-            var otherSize = 11 - size - 3;
-            _pipes[0].Position = new Vector2(Globals.ScreenWidth + _pipes[0].Bounds.Width, 0);
-            _pipes[0].Size = new Vector2(PIPE_WIDTH, size * 64);
-
-            _pipes[1].Position = new Vector2(Globals.ScreenWidth + _pipes[1].Bounds.Width, Globals.ScreenHeight - otherSize * 64);
-            _pipes[1].Size = new Vector2(PIPE_WIDTH, otherSize * 64);
-        }
-
-        if (_pipes[2].Bounds.Right < 0) {
-            var size = GetNextGap();
-            var otherSize = 11 - size - 3;
-            _pipes[2].Position = new Vector2(Globals.ScreenWidth + _pipes[2].Bounds.Width, 0);
-            _pipes[2].Size = new Vector2(PIPE_WIDTH, size * 64);
-
-            _pipes[3].Position = new Vector2(Globals.ScreenWidth + _pipes[3].Bounds.Width, Globals.ScreenHeight - otherSize * 64);
-            _pipes[3].Size = new Vector2(PIPE_WIDTH, otherSize * 64);
-        }
-
-        var wasCollision = false;
-
-        foreach (var pipe in _pipes) {
-            if (_bird.Bounds.Intersects(pipe.Bounds)) {
-                wasCollision =  true;
-                break;
-            }
-        }
-
-        if (_bird.Bounds.Top < 0 || _bird.Bounds.Bottom > Globals.ScreenHeight) {
-            wasCollision =  true;
-        }
-
-        if (wasCollision) {
-            _isPause = true;
-            _isGameOver = true;
-        }
-
-
-        foreach (var pipe in _pipes) {
-            if (_bird.Bounds.Left > pipe.Bounds.Right && pipe.IsScoreable) {
-                pipe.IsScoreable = false;
-                _score += 1;
-                _scoreText.Content = (_score / 2).ToString();
-                break; // Only need pass 1/4
-            }
-        }
+        // _bird.Velocity += new Vector2(0, GRAVITY * dt);
+        // _bird.Velocity = new Vector2(
+        //     _bird.Velocity.X,
+        //     Math.Clamp(_bird.Velocity.Y, -IMPULSE, 1000f)
+        // );
+        // _bird.Position += _bird.Velocity * _bird.Speed * dt;
 
         _previousKeyboardState = ks;
     }
@@ -253,11 +148,7 @@ public class GameScene : Scene
     {
         SpriteBatch.Begin();
 
-        _bird.Draw(SpriteBatch);
-
-        foreach (var pipe in _pipes) {
-            pipe.Draw(SpriteBatch);
-        }
+        _spaceship.Draw(SpriteBatch);
 
         if (_isGameOver) {
             _panel.Draw(SpriteBatch);
@@ -276,8 +167,8 @@ public class GameScene : Scene
         SpriteBatch.End();
     }
 
-    private int GetNextGap()
-    {
-        return _random.Next(2, 7);
-    }
+    // private int GetNextGap()
+    // {
+    //     return _random.Next(2, 7);
+    // }
 }
