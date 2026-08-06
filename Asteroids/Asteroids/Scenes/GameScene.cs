@@ -42,6 +42,8 @@ public class GameScene : Scene
     private Text _scoreText;
 
     private Texture2D _spaceshipSprite;
+    private float _accAccel;
+    private float _acceleration = 10f;
 
     public GameScene(
         ContentManager contentManager,
@@ -59,6 +61,8 @@ public class GameScene : Scene
         _isPause = false;
         _isGameOver = false;
         _youWon = false;
+
+        _accAccel = 0;
     }
 
     public override void LoadContent()
@@ -92,7 +96,7 @@ public class GameScene : Scene
         _spaceshipSprite = ContentManager.Load<Texture2D>("images/Spaceship");
         _spaceship = new Spaceship(
             _spaceshipSprite,
-            new Vector2(Globals.ScreenWidth / 2 - 64 / 2, Globals.ScreenHeight / 2 - 32 / 2)
+            new Vector2(Globals.ScreenWidth / 2 - _spaceshipSprite.Width / 2, Globals.ScreenHeight / 2 - _spaceshipSprite.Height / 2)
         );
         _spaceship.Speed = 1f;
 
@@ -127,6 +131,23 @@ public class GameScene : Scene
         if (_moveTimer >= 0.1f) {
             _canMove = true;
             _moveTimer = 0f;
+        }
+
+        _spaceship.Update(gameTime);
+
+        if (ks.IsKeyDown(Keys.W)) {
+            // _spaceship.Velocity = new Vector2(0, -20);
+            if (_accAccel <= 200) {
+                _accAccel += _acceleration;
+            }
+        } else {
+            if (_accAccel > 0) {
+                _accAccel -= (_acceleration / 2f);
+            }
+        }
+
+        if (_accAccel > 0) {
+            _spaceship.Velocity = new Vector2(0, -_accAccel);
         }
 
         // var spacePressedOneTime = ks.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space);
