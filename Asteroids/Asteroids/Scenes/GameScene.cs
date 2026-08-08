@@ -145,10 +145,8 @@ public class GameScene : Scene
 
         if (ks.IsKeyDown(Keys.W)) {
             _spaceship.Velocity += direction * _accelerationForce * dt;
-        }
-
-        if (ks.IsKeyDown(Keys.S)) {
-            _spaceship.Velocity -= direction * _accelerationForce * dt * 2;
+        } else {
+            _spaceship.Velocity *= 0.99f;
         }
 
         _spaceship.Velocity = Vector2.Clamp(_spaceship.Velocity, new Vector2(-100, -100), new Vector2(100, 100));
