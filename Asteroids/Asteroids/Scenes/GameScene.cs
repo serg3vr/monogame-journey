@@ -42,8 +42,10 @@ public class GameScene : Scene
     private Text _scoreText;
 
     private Texture2D _spaceshipSprite;
-    private float _accAccel;
+    private float _maxAcceleration = 1000f;
     private float _acceleration = 10f;
+    private float _accelerationForce = 300f;
+    private float _maxSpeed = 1000f;
 
     public GameScene(
         ContentManager contentManager,
@@ -61,8 +63,6 @@ public class GameScene : Scene
         _isPause = false;
         _isGameOver = false;
         _youWon = false;
-
-        _accAccel = 0;
     }
 
     public override void LoadContent()
@@ -81,13 +81,13 @@ public class GameScene : Scene
         var stringSize = _mediumFont.MeasureString(text) * scale;
         _gameOverText = new Text(_mediumFont, new Vector2(Globals.ScreenWidth / 2 - stringSize.X / 2, 100));
         _gameOverText.Scale = Vector2.One * scale;
-        _gameOverText.Content = text;
+        _gameOverText.Value = text;
 
         text = "YOU WON";
         stringSize = _mediumFont.MeasureString(text) * scale;
         _youWonText = new Text(_mediumFont, new Vector2(Globals.ScreenWidth / 2 - stringSize.X / 2, 100));
         _youWonText.Scale = Vector2.One * scale;
-        _youWonText.Content = text;
+        _youWonText.Value = text;
 
         _restartButton.OnClick = () => {
             SceneManager.ChangeScene(new GameScene(ContentManager, GraphicsDevice, SpriteBatch, SceneManager));
@@ -98,11 +98,11 @@ public class GameScene : Scene
             _spaceshipSprite,
             new Vector2(Globals.ScreenWidth / 2 - _spaceshipSprite.Width / 2, Globals.ScreenHeight / 2 - _spaceshipSprite.Height / 2)
         );
-        _spaceship.Speed = 1f;
+        _spaceship.Speed = 100f;
 
         _scoreText = new Text(_mediumFont, new Vector2(Globals.ScreenWidth /2, 100));
         _scoreText.Scale = Vector2.One * scale;
-        _scoreText.Content = _score.ToString();
+        _scoreText.Value = _score.ToString();
     }
 
     public override void Update(GameTime gameTime)
@@ -133,34 +133,28 @@ public class GameScene : Scene
             _moveTimer = 0f;
         }
 
-        _spaceship.Update(gameTime);
+        if (ks.IsKeyDown(Keys.A)) {
+            _spaceship.Rotation -= 10 * dt; // _rotationSpeed * dt;
+        }
+
+        if (ks.IsKeyDown(Keys.D)) {
+            _spaceship.Rotation += 10 * dt; // _rotationSpeed * dt;
+        }
+
+        Vector2 direction = Vector2.Transform(new Vector2(0, -1), Matrix.CreateRotationZ(_spaceship.Rotation));
 
         if (ks.IsKeyDown(Keys.W)) {
-            // _spaceship.Velocity = new Vector2(0, -20);
-            if (_accAccel <= 200) {
-                _accAccel += _acceleration;
-            }
-        } else {
-            if (_accAccel > 0) {
-                _accAccel -= (_acceleration / 2f);
-            }
+            _spaceship.Velocity += direction * _accelerationForce * dt;
         }
 
-        if (_accAccel > 0) {
-            _spaceship.Velocity = new Vector2(0, -_accAccel);
+        if (ks.IsKeyDown(Keys.S)) {
+            _spaceship.Velocity -= direction * _accelerationForce * dt * 2;
         }
 
-        // var spacePressedOneTime = ks.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space);
-        // if (spacePressedOneTime) {
-        //     _bird.Velocity = new Vector2(0, -IMPULSE);
-        // }
+        _spaceship.Velocity = Vector2.Clamp(_spaceship.Velocity, new Vector2(-100, -100), new Vector2(100, 100));
+        _scoreText.Value = _spaceship.Velocity.ToString();
 
-        // _bird.Velocity += new Vector2(0, GRAVITY * dt);
-        // _bird.Velocity = new Vector2(
-        //     _bird.Velocity.X,
-        //     Math.Clamp(_bird.Velocity.Y, -IMPULSE, 1000f)
-        // );
-        // _bird.Position += _bird.Velocity * _bird.Speed * dt;
+        _spaceship.Position += _spaceship.Velocity * dt;
 
         _previousKeyboardState = ks;
     }

@@ -8,7 +8,7 @@ public class Text
     private SpriteFont _font;
     public Vector2 Position { get; set; }
     public Vector2 Scale { get; set; }
-    public string Content { get; set; }
+    public string Value { get; set; }
 
     public Text(SpriteFont font, Vector2 position)
     {
@@ -24,7 +24,7 @@ public class Text
     {
         spriteBatch.DrawString(
             _font, 
-            Content, 
+            Value, 
             Position, 
             Color.Red, 
             0f, 
