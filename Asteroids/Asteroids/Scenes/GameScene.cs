@@ -8,6 +8,7 @@ using Asteroids.Core.Scenes;
 using Asteroids.GameObjects;
 using System.Collections.Generic;
 using Asteroids.Core.UI;
+using Asteroids.Graphics.Core;
 
 namespace Asteroids.Scenes;
 
@@ -40,9 +41,15 @@ public class GameScene : Scene
     private Text _scoreText;
 
     private Texture2D _spaceshipSprite;
+    private Texture2D _bulletSprite;
+    
     private float _accelerationForce = 300f;
     private static readonly Vector2 _forwardDirection = new(0, -1);
     private static readonly Vector2 _maxVelocity = new (100, 100);
+
+    private List<Bullet> _bulletlist;
+
+    private Bullet _bullet;
 
     public GameScene(
         ContentManager contentManager,
@@ -60,6 +67,8 @@ public class GameScene : Scene
         _isPause = false;
         _isGameOver = false;
         _youWon = false;
+
+        _bulletlist = new List<Bullet>();
     }
 
     public override void LoadContent()
@@ -101,6 +110,10 @@ public class GameScene : Scene
         _scoreText = new Text(_mediumFont, new Vector2(Globals.ScreenWidth /2, 100));
         _scoreText.Scale = Vector2.One * scale;
         _scoreText.Value = _score.ToString();
+
+        // _bullet = new Bullet(_texture, )
+
+        _bulletSprite = ContentManager.Load<Texture2D>("images/Bullet");
     }
 
     public override void Update(GameTime gameTime)
@@ -129,6 +142,12 @@ public class GameScene : Scene
         if (_moveTimer >= 0.1f) {
             _canMove = true;
             _moveTimer = 0f;
+        }
+
+        if (ks.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space)) {
+            var size = new Vector2(_bulletSprite.Width, _bulletSprite.Height);
+            var bullet = new Bullet(_bulletSprite, _spaceship.Position, size);
+            _bulletlist.Add(bullet);
         }
 
         if (ks.IsKeyDown(Keys.A)) {
@@ -160,6 +179,10 @@ public class GameScene : Scene
         SpriteBatch.Begin();
 
         _spaceship.Draw(SpriteBatch);
+
+        foreach (var bl in _bulletlist) {
+            bl.Draw(SpriteBatch);
+        }
 
         if (_isGameOver) {
             _panel.Draw(SpriteBatch);
