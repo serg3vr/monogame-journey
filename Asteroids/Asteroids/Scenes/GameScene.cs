@@ -29,8 +29,6 @@ public class GameScene : Scene
     private Button _restartButton;
     private Text _youWonText;
 
-    private Color[] _powerUpsColors = { Color.Red, Color.Orange, Color.Yellow, Color.Green, Color.Purple, Color.Cyan };
-
     private bool _canMove;
     private float _moveTimer;
     private SpriteFont _mediumFont;
@@ -42,10 +40,9 @@ public class GameScene : Scene
     private Text _scoreText;
 
     private Texture2D _spaceshipSprite;
-    private float _maxAcceleration = 1000f;
-    private float _acceleration = 10f;
     private float _accelerationForce = 300f;
-    private float _maxSpeed = 1000f;
+    private static readonly Vector2 _forwardDirection = new(0, -1);
+    private static readonly Vector2 _maxVelocity = new (100, 100);
 
     public GameScene(
         ContentManager contentManager,
@@ -96,7 +93,8 @@ public class GameScene : Scene
         _spaceshipSprite = ContentManager.Load<Texture2D>("images/Spaceship");
         _spaceship = new Spaceship(
             _spaceshipSprite,
-            new Vector2(Globals.ScreenWidth / 2 - _spaceshipSprite.Width / 2, Globals.ScreenHeight / 2 - _spaceshipSprite.Height / 2)
+            new Vector2(Globals.ScreenWidth / 2 - _spaceshipSprite.Width / 2, Globals.ScreenHeight / 2 - _spaceshipSprite.Height / 2),
+            _texture
         );
         _spaceship.Speed = 100f;
 
@@ -141,7 +139,7 @@ public class GameScene : Scene
             _spaceship.Rotation += 10 * dt; // _rotationSpeed * dt;
         }
 
-        Vector2 direction = Vector2.Transform(new Vector2(0, -1), Matrix.CreateRotationZ(_spaceship.Rotation));
+        Vector2 direction = Vector2.Transform(_forwardDirection, Matrix.CreateRotationZ(_spaceship.Rotation));
 
         if (ks.IsKeyDown(Keys.W)) {
             _spaceship.Velocity += direction * _accelerationForce * dt;
@@ -149,8 +147,8 @@ public class GameScene : Scene
             _spaceship.Velocity *= 0.99f;
         }
 
-        _spaceship.Velocity = Vector2.Clamp(_spaceship.Velocity, new Vector2(-100, -100), new Vector2(100, 100));
-        _scoreText.Value = _spaceship.Velocity.ToString();
+        _spaceship.Velocity = Vector2.Clamp(_spaceship.Velocity, -_maxVelocity, _maxVelocity);
+        // _scoreText.Value = _spaceship.Velocity.ToString();
 
         _spaceship.Position += _spaceship.Velocity * dt;
 
