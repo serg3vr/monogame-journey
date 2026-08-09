@@ -8,10 +8,10 @@ public class Sprite
     public Texture2D Texture { get; }
     public Vector2 Position { get; set; }
     public Vector2 Velocity { get; set; }
-    public Vector2 Rotation { get; set; }
+    public float Rotation { get; set; }
     public Vector2 Size { get; set; }
     public Color SpriteColor { get; set; } = Color.White;
-    public Rectangle Bounds => new Rectangle((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
+    public Rectangle Bounds => new((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
 
     public Sprite(Texture2D texture, Vector2 position, Vector2 size)
     {

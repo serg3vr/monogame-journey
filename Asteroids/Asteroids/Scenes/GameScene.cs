@@ -9,6 +9,7 @@ using Asteroids.GameObjects;
 using System.Collections.Generic;
 using Asteroids.Core.UI;
 using Asteroids.Graphics.Core;
+using System.Net.NetworkInformation;
 
 namespace Asteroids.Scenes;
 
@@ -44,7 +45,6 @@ public class GameScene : Scene
     private Texture2D _bulletSprite;
     
     private float _accelerationForce = 300f;
-    private static readonly Vector2 _forwardDirection = new(0, -1);
     private static readonly Vector2 _maxVelocity = new (100, 100);
 
     private List<Bullet> _bulletlist;
@@ -99,21 +99,16 @@ public class GameScene : Scene
             SceneManager.ChangeScene(new GameScene(ContentManager, GraphicsDevice, SpriteBatch, SceneManager));
         };
 
-        _spaceshipSprite = ContentManager.Load<Texture2D>("images/Spaceship");
-        _spaceship = new Spaceship(
-            _spaceshipSprite,
-            new Vector2(Globals.ScreenWidth / 2 - _spaceshipSprite.Width / 2, Globals.ScreenHeight / 2 - _spaceshipSprite.Height / 2),
-            _texture
-        );
-        _spaceship.Speed = 100f;
+        // _spaceshipSprite = ContentManager.Load<Texture2D>("images/Spaceship");
+        var size = new Vector2(32, 32);
+        var center = new Vector2(Globals.ScreenWidth / 2 - size.X / 2, Globals.ScreenHeight / 2 - size.Y / 2);
+        _spaceship = new Spaceship(_texture, center, size);
+        _spaceship.SpriteColor = Color.White;
+        // _spaceship.Speed = 100f;
 
         _scoreText = new Text(_mediumFont, new Vector2(Globals.ScreenWidth /2, 100));
         _scoreText.Scale = Vector2.One * scale;
         _scoreText.Value = _score.ToString();
-
-        // _bullet = new Bullet(_texture, )
-
-        _bulletSprite = ContentManager.Load<Texture2D>("images/Bullet");
     }
 
     public override void Update(GameTime gameTime)
@@ -158,13 +153,22 @@ public class GameScene : Scene
             _spaceship.Rotation += 10 * dt; // _rotationSpeed * dt;
         }
 
-        Vector2 direction = Vector2.Transform(_forwardDirection, Matrix.CreateRotationZ(_spaceship.Rotation));
+        var x = MathF.Cos(_spaceship.Rotation);
+        var y = MathF.Sin(_spaceship.Rotation);
 
         if (ks.IsKeyDown(Keys.W)) {
-            _spaceship.Velocity += direction * _accelerationForce * dt;
+            _spaceship.Acceleration = new Vector2(x, y) * _accelerationForce;
+            _spaceship.Velocity += _spaceship.Acceleration * dt;
         } else {
             _spaceship.Velocity *= 0.99f;
         }
+        // Vector2 direction = Vector2.Transform(Direction.Up, Matrix.CreateRotationZ(_spaceship.Rotation));
+
+        // if (ks.IsKeyDown(Keys.W)) {
+        //     _spaceship.Velocity += direction * _accelerationForce * dt;
+        // } else {
+        //     _spaceship.Velocity *= 0.99f;
+        // }
 
         _spaceship.Velocity = Vector2.Clamp(_spaceship.Velocity, -_maxVelocity, _maxVelocity);
         // _scoreText.Value = _spaceship.Velocity.ToString();
@@ -179,6 +183,10 @@ public class GameScene : Scene
         SpriteBatch.Begin();
 
         _spaceship.Draw(SpriteBatch);
+        
+        // Debug lines
+        // SpriteBatch.Draw(_texture, new Rectangle(Globals.ScreenWidth / 2, 0, 1, Globals.ScreenHeight), Color.Green);
+        // SpriteBatch.Draw(_texture, new Rectangle(0, Globals.ScreenHeight / 2, Globals.ScreenWidth, 1), Color.Green);
 
         foreach (var bl in _bulletlist) {
             bl.Draw(SpriteBatch);
@@ -189,6 +197,7 @@ public class GameScene : Scene
             _gameOverText.Draw(SpriteBatch);
             _restartButton.Draw(SpriteBatch);
         }
+        
 
         if (_youWon) {
             _panel.Draw(SpriteBatch);
