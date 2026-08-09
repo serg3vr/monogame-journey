@@ -8,6 +8,7 @@ public class Sprite
     public Texture2D Texture { get; }
     public Vector2 Position { get; set; }
     public Vector2 Velocity { get; set; }
+    public float Speed  { get; set; }
     public float Rotation { get; set; }
     public Vector2 Size { get; set; }
     public Color SpriteColor { get; set; } = Color.White;

@@ -8,21 +8,29 @@ namespace Asteroids.GameObjects;
 
 public class Bullet : Sprite
 {
-    // public float Speed { get ; set; }
-    // public Vector2 Direction { get; set; }
+    private int _lifetime = 2;
+    private float _lifetimeCounter = 1;
+    public bool ShouldBeDeleted { get; set; }
 
-    public Bullet(Texture2D texture, Vector2 position, Vector2 size)
+    public Bullet(Texture2D texture, Vector2 position, Vector2 size, float rotation)
     : base(texture, position, size)
     {
-        Velocity = new Vector2(-1, 0);
-        // Speed = 100f;
-
+        Rotation = rotation;
+        ShouldBeDeleted = false;
     }
 
     public void Update(GameTime gameTime)
     {
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
-        Position += Velocity * dt;
+
+        if (_lifetimeCounter >= _lifetime) {
+            ShouldBeDeleted = true;
+        } else {
+            _lifetimeCounter += dt;
+        }
+
+        var direction = Vector2.Transform(Direction.Up, Matrix.CreateRotationZ(Rotation));
+        Position += direction * Speed * dt;
     }
 
     public new void Draw(SpriteBatch spriteBatch)

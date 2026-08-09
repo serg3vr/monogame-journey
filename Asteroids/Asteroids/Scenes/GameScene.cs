@@ -43,13 +43,11 @@ public class GameScene : Scene
 
     private Texture2D _spaceshipSprite;
     private Texture2D _bulletSprite;
-    
+
     private float _accelerationForce = 300f;
-    private static readonly Vector2 _maxVelocity = new (100, 100);
+    private static readonly Vector2 _maxVelocity = new(100, 100);
 
     private List<Bullet> _bulletlist;
-
-    private Bullet _bullet;
 
     public GameScene(
         ContentManager contentManager,
@@ -106,7 +104,7 @@ public class GameScene : Scene
         _spaceship.SpriteColor = Color.White;
         // _spaceship.Speed = 100f;
 
-        _scoreText = new Text(_mediumFont, new Vector2(Globals.ScreenWidth /2, 100));
+        _scoreText = new Text(_mediumFont, new Vector2(Globals.ScreenWidth / 2, 100));
         _scoreText.Scale = Vector2.One * scale;
         _scoreText.Value = _score.ToString();
     }
@@ -139,12 +137,6 @@ public class GameScene : Scene
             _moveTimer = 0f;
         }
 
-        if (ks.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space)) {
-            var size = new Vector2(_bulletSprite.Width, _bulletSprite.Height);
-            var bullet = new Bullet(_bulletSprite, _spaceship.Position, size);
-            _bulletlist.Add(bullet);
-        }
-
         if (ks.IsKeyDown(Keys.A)) {
             _spaceship.Rotation -= 10 * dt; // _rotationSpeed * dt;
         }
@@ -167,6 +159,18 @@ public class GameScene : Scene
 
         _spaceship.Position += _spaceship.Velocity * dt;
 
+        if (ks.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space)) {
+            var bullet = new Bullet(_texture, _spaceship.Position, new Vector2(8, 8), _spaceship.Rotation);
+            bullet.Speed = 650f;
+            _bulletlist.Add(bullet);
+        }
+
+        foreach (var bl in _bulletlist) {
+            bl.Update(gameTime);
+        }
+
+        _bulletlist.RemoveAll(bl => bl.ShouldBeDeleted);
+
         _previousKeyboardState = ks;
     }
 
@@ -175,7 +179,7 @@ public class GameScene : Scene
         SpriteBatch.Begin();
 
         _spaceship.Draw(SpriteBatch);
-        
+
         // Debug lines
         // SpriteBatch.Draw(_texture, new Rectangle(Globals.ScreenWidth / 2, 0, 1, Globals.ScreenHeight), Color.Green);
         // SpriteBatch.Draw(_texture, new Rectangle(0, Globals.ScreenHeight / 2, Globals.ScreenWidth, 1), Color.Green);
@@ -189,7 +193,7 @@ public class GameScene : Scene
             _gameOverText.Draw(SpriteBatch);
             _restartButton.Draw(SpriteBatch);
         }
-        
+
 
         if (_youWon) {
             _panel.Draw(SpriteBatch);
