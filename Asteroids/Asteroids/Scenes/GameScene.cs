@@ -153,22 +153,14 @@ public class GameScene : Scene
             _spaceship.Rotation += 10 * dt; // _rotationSpeed * dt;
         }
 
-        var x = MathF.Cos(_spaceship.Rotation);
-        var y = MathF.Sin(_spaceship.Rotation);
+        var rotation = Vector2.Transform(Direction.Up, Matrix.CreateRotationZ(_spaceship.Rotation));
 
         if (ks.IsKeyDown(Keys.W)) {
-            _spaceship.Acceleration = new Vector2(x, y) * _accelerationForce;
+            _spaceship.Acceleration = rotation * _accelerationForce;
             _spaceship.Velocity += _spaceship.Acceleration * dt;
         } else {
             _spaceship.Velocity *= 0.99f;
         }
-        // Vector2 direction = Vector2.Transform(Direction.Up, Matrix.CreateRotationZ(_spaceship.Rotation));
-
-        // if (ks.IsKeyDown(Keys.W)) {
-        //     _spaceship.Velocity += direction * _accelerationForce * dt;
-        // } else {
-        //     _spaceship.Velocity *= 0.99f;
-        // }
 
         _spaceship.Velocity = Vector2.Clamp(_spaceship.Velocity, -_maxVelocity, _maxVelocity);
         // _scoreText.Value = _spaceship.Velocity.ToString();
