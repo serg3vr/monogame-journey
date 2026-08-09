@@ -31,7 +31,6 @@ public class GameScene : Scene
     private Button _restartButton;
     private Text _youWonText;
 
-    private bool _canMove;
     private float _moveTimer;
     private SpriteFont _mediumFont;
 
@@ -41,13 +40,11 @@ public class GameScene : Scene
     private int _score = 0;
     private Text _scoreText;
 
-    private Texture2D _spaceshipSprite;
-    private Texture2D _bulletSprite;
-
     private float _accelerationForce = 300f;
     private static readonly Vector2 _maxVelocity = new(100, 100);
 
     private List<Bullet> _bulletlist;
+    private List<Asteroid> _asteroidList;
 
     public GameScene(
         ContentManager contentManager,
@@ -67,6 +64,7 @@ public class GameScene : Scene
         _youWon = false;
 
         _bulletlist = new List<Bullet>();
+        _asteroidList = new List<Asteroid>();
     }
 
     public override void LoadContent()
@@ -107,6 +105,13 @@ public class GameScene : Scene
         _scoreText = new Text(_mediumFont, new Vector2(Globals.ScreenWidth / 2, 100));
         _scoreText.Scale = Vector2.One * scale;
         _scoreText.Value = _score.ToString();
+
+        var asteroidPos = new Vector2(_random.Next(50, 400), _random.Next(50, 400));
+        var asteroidRot = _random.Next(0, 40);
+
+        var obj = new Asteroid(_texture, asteroidPos, new Vector2(128, 128), asteroidRot);
+        obj.Speed = 10f;
+        _asteroidList.Add(obj);
     }
 
     public override void Update(GameTime gameTime)
@@ -133,7 +138,7 @@ public class GameScene : Scene
         _moveTimer += dt;
 
         if (_moveTimer >= 0.1f) {
-            _canMove = true;
+            // _canMove = true;
             _moveTimer = 0f;
         }
 
@@ -169,7 +174,31 @@ public class GameScene : Scene
             bl.Update(gameTime);
         }
 
+        foreach (var asteroid in _asteroidList) {
+            asteroid.Update(gameTime);
+
+            foreach (var bullet in _bulletlist) {
+                if (asteroid.Bounds.Intersects(bullet.Bounds)) {
+                    asteroid.ShouldBeDeleted = true;
+                    bullet.ShouldBeDeleted = true;
+
+                    var rotationPlus = asteroid.Rotation + 10;
+                    var rotationMinus = asteroid.Rotation - 10;
+                    
+                    var obj = new Asteroid(_texture, asteroid.Position, new Vector2(128, 128), rotationPlus);
+                    obj.Speed = 20f;
+                    _asteroidList.Add(obj);
+                    
+                    var obj2 = new Asteroid(_texture, asteroid.Position, new Vector2(128, 128), rotationMinus);
+                    obj2.Speed = 20f;
+                    _asteroidList.Add(obj2);
+                }
+            }
+
+        }
+
         _bulletlist.RemoveAll(bl => bl.ShouldBeDeleted);
+        _asteroidList.RemoveAll(bl => bl.ShouldBeDeleted);
 
         _previousKeyboardState = ks;
     }
@@ -186,6 +215,10 @@ public class GameScene : Scene
 
         foreach (var bl in _bulletlist) {
             bl.Draw(SpriteBatch);
+        }
+
+        foreach (var al in _asteroidList) {
+            al.Draw(SpriteBatch);
         }
 
         if (_isGameOver) {
