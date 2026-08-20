@@ -8,8 +8,6 @@ using Asteroids.Core.Scenes;
 using Asteroids.GameObjects;
 using System.Collections.Generic;
 using Asteroids.Core.UI;
-using Asteroids.Graphics.Core;
-using System.Net.NetworkInformation;
 
 namespace Asteroids.Scenes;
 
@@ -45,6 +43,7 @@ public class GameScene : Scene
 
     private List<Bullet> _bulletlist;
     private List<Asteroid> _asteroidList;
+    private List<Asteroid> _asteroidsToAdd;
 
     public GameScene(
         ContentManager contentManager,
@@ -65,6 +64,7 @@ public class GameScene : Scene
 
         _bulletlist = new List<Bullet>();
         _asteroidList = new List<Asteroid>();
+        _asteroidsToAdd = new List<Asteroid>();
     }
 
     public override void LoadContent()
@@ -95,12 +95,10 @@ public class GameScene : Scene
             SceneManager.ChangeScene(new GameScene(ContentManager, GraphicsDevice, SpriteBatch, SceneManager));
         };
 
-        // _spaceshipSprite = ContentManager.Load<Texture2D>("images/Spaceship");
         var size = new Vector2(32, 32);
         var center = new Vector2(Globals.ScreenWidth / 2 - size.X / 2, Globals.ScreenHeight / 2 - size.Y / 2);
         _spaceship = new Spaceship(_texture, center, size);
         _spaceship.SpriteColor = Color.White;
-        // _spaceship.Speed = 100f;
 
         _scoreText = new Text(_mediumFont, new Vector2(Globals.ScreenWidth / 2, 100));
         _scoreText.Scale = Vector2.One * scale;
@@ -110,7 +108,7 @@ public class GameScene : Scene
         var asteroidRot = _random.Next(0, 40);
 
         var obj = new Asteroid(_texture, asteroidPos, new Vector2(128, 128), asteroidRot);
-        obj.Speed = 10f;
+        obj.Speed = 30f;
         _asteroidList.Add(obj);
     }
 
@@ -178,23 +176,34 @@ public class GameScene : Scene
             asteroid.Update(gameTime);
 
             foreach (var bullet in _bulletlist) {
+                if (asteroid.ShouldBeDeleted || bullet.ShouldBeDeleted)
+                    continue;
+
                 if (asteroid.Bounds.Intersects(bullet.Bounds)) {
                     asteroid.ShouldBeDeleted = true;
                     bullet.ShouldBeDeleted = true;
 
-                    var rotationPlus = asteroid.Rotation + 10;
-                    var rotationMinus = asteroid.Rotation - 10;
-                    
-                    var obj = new Asteroid(_texture, asteroid.Position, new Vector2(128, 128), rotationPlus);
-                    obj.Speed = 20f;
-                    _asteroidList.Add(obj);
-                    
-                    var obj2 = new Asteroid(_texture, asteroid.Position, new Vector2(128, 128), rotationMinus);
-                    obj2.Speed = 20f;
-                    _asteroidList.Add(obj2);
+                    if (asteroid.Health > 0) {
+                        var rotationPlus = asteroid.Rotation + 10;
+                        var rotationMinus = asteroid.Rotation - 10;
+                        
+                        var obj = new Asteroid(_texture, asteroid.Position, asteroid.Size * 0.5f, rotationPlus);
+                        obj.Speed = asteroid.Speed * 1.5f;
+                        obj.Health -= 1;
+                        _asteroidsToAdd.Add(obj);
+                        
+                        var obj2 = new Asteroid(_texture, asteroid.Position, asteroid.Size * 0.5f, rotationMinus);
+                        obj2.Speed = asteroid.Speed * 1.5f;
+                        obj2.Health -= 1;
+                        _asteroidsToAdd.Add(obj2);
+                    }
                 }
             }
+        }
 
+        if (_asteroidsToAdd.Count > 0) {
+            _asteroidList.AddRange(_asteroidsToAdd);
+            _asteroidsToAdd.Clear();
         }
 
         _bulletlist.RemoveAll(bl => bl.ShouldBeDeleted);

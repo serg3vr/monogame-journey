@@ -10,6 +10,7 @@ public class Asteroid : Sprite
 {
     public bool ShouldBeDeleted { get; set; }
     public float RotationSpeed { get; set; } = 1f;
+    public int Health = 2;
 
     public Asteroid(Texture2D texture, Vector2 position, Vector2 size, float rotation)
     : base(texture, position, size)

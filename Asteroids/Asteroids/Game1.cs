@@ -51,6 +51,9 @@ public class Game1 : Game
 
         _sceneManager.Update(gameTime);
 
+        if (_sceneManager.WantsToExit)
+            Exit();
+
         base.Update(gameTime);
     }
 
