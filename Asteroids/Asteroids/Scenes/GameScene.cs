@@ -157,6 +157,8 @@ public class GameScene : Scene
             _spaceship.Velocity *= 0.99f;
         }
 
+        _spaceship.Update(gameTime);
+
         _spaceship.Velocity = Vector2.Clamp(_spaceship.Velocity, -_maxVelocity, _maxVelocity);
         // _scoreText.Value = _spaceship.Velocity.ToString();
 

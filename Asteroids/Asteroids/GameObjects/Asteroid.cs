@@ -26,6 +26,22 @@ public class Asteroid : Sprite
     {
         float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+        if (Bounds.Bottom < 0) {
+            Position = new Vector2(Position.X, Globals.ScreenHeight);
+        }
+
+        if (Bounds.Top > Globals.ScreenHeight) {
+            Position = new Vector2(Position.X, 0);
+        }
+
+        if (Bounds.Right < 0) {
+            Position = new Vector2(Globals.ScreenWidth, Position.Y);
+        }
+
+        if (Bounds.Left > Globals.ScreenWidth) {
+            Position = new Vector2(0, Position.Y);
+        }
+
         Rotation += RotationSpeed * dt;
         Position += Velocity * Speed * dt;
     }
