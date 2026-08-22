@@ -39,7 +39,7 @@ public class GameScene : Scene
     private Text _scoreText;
 
     private float _accelerationForce = 300f;
-    private static readonly Vector2 _maxVelocity = new(100, 100);
+    private static readonly float _maxVelocity = 150f;
 
     private List<Bullet> _bulletlist;
     private List<Asteroid> _asteroidList;
@@ -158,8 +158,8 @@ public class GameScene : Scene
         }
 
         float speed = _spaceship.Velocity.Length();
-        if (speed > _maxVelocity.X) {
-            _spaceship.Velocity = _spaceship.Velocity / speed * _maxVelocity.X;
+        if (speed > _maxVelocity) {
+            _spaceship.Velocity = _spaceship.Velocity / speed * _maxVelocity;
         }
 
         _spaceship.Update(gameTime);
@@ -213,6 +213,11 @@ public class GameScene : Scene
 
         _bulletlist.RemoveAll(bl => bl.ShouldBeDeleted);
         _asteroidList.RemoveAll(bl => bl.ShouldBeDeleted);
+
+        if (_asteroidList.Count == 0) {
+            _isGameOver = true;
+            _isPause = true;
+        }
 
         _previousKeyboardState = ks;
     }
