@@ -154,13 +154,15 @@ public class GameScene : Scene
             _spaceship.Acceleration = rotation * _accelerationForce;
             _spaceship.Velocity += _spaceship.Acceleration * dt;
         } else {
-            _spaceship.Velocity *= 0.99f;
+            _spaceship.Velocity *= MathF.Pow(0.01f, dt);
+        }
+
+        float speed = _spaceship.Velocity.Length();
+        if (speed > _maxVelocity.X) {
+            _spaceship.Velocity = _spaceship.Velocity / speed * _maxVelocity.X;
         }
 
         _spaceship.Update(gameTime);
-
-        _spaceship.Velocity = Vector2.Clamp(_spaceship.Velocity, -_maxVelocity, _maxVelocity);
-        // _scoreText.Value = _spaceship.Velocity.ToString();
 
         _spaceship.Position += _spaceship.Velocity * dt;
 
