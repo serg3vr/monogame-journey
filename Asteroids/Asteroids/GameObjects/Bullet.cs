@@ -33,8 +33,9 @@ public class Bullet : Sprite
         Position += direction * Speed * dt;
     }
 
-    public new void Draw(SpriteBatch spriteBatch)
+    public override void Draw(SpriteBatch spriteBatch)
     {
         spriteBatch.Draw(Texture, new Rectangle(Bounds.X + 2, Bounds.Y + 2, Bounds.Width - 4, Bounds.Height - 4), SpriteColor);
+        base.DrawDebug(spriteBatch);
     }
 }

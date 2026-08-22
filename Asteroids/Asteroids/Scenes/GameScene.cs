@@ -8,6 +8,7 @@ using Asteroids.Core.Scenes;
 using Asteroids.GameObjects;
 using System.Collections.Generic;
 using Asteroids.Core.UI;
+using Asteroids.Graphics.Core;
 
 namespace Asteroids.Scenes;
 
@@ -71,6 +72,8 @@ public class GameScene : Scene
     {
         _texture = new Texture2D(GraphicsDevice, 1, 1);
         _texture.SetData(new[] { Color.White });
+
+        Sprite.DebugPixel = _texture;
 
         _smallFont = ContentManager.Load<SpriteFont>("fonts/small");
         _mediumFont = ContentManager.Load<SpriteFont>("fonts/medium");
