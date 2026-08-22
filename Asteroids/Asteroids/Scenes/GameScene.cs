@@ -184,6 +184,7 @@ public class GameScene : Scene
                 if (asteroid.Bounds.Intersects(bullet.Bounds)) {
                     asteroid.ShouldBeDeleted = true;
                     bullet.ShouldBeDeleted = true;
+                    asteroid.Health -= 1;
 
                     if (asteroid.Health > 0) {
                         var rotationPlus = asteroid.Rotation + 10;
@@ -191,12 +192,12 @@ public class GameScene : Scene
                         
                         var obj = new Asteroid(_texture, asteroid.Position, asteroid.Size * 0.5f, rotationPlus);
                         obj.Speed = asteroid.Speed * 1.5f;
-                        obj.Health -= 1;
+                        obj.Health = asteroid.Health;
                         _asteroidsToAdd.Add(obj);
                         
                         var obj2 = new Asteroid(_texture, asteroid.Position, asteroid.Size * 0.5f, rotationMinus);
                         obj2.Speed = asteroid.Speed * 1.5f;
-                        obj2.Health -= 1;
+                        obj2.Health = asteroid.Health;
                         _asteroidsToAdd.Add(obj2);
                     }
                 }
@@ -230,6 +231,7 @@ public class GameScene : Scene
 
         foreach (var al in _asteroidList) {
             al.Draw(SpriteBatch);
+            SpriteBatch.DrawString(_smallFont, $"HP: {al.Health}", new Vector2(al.Bounds.Left, al.Bounds.Top), Color.Red);
         }
 
         if (_isGameOver) {
