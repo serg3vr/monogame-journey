@@ -107,12 +107,13 @@ public class GameScene : Scene
         _scoreText.Scale = Vector2.One * scale;
         _scoreText.Value = _score.ToString();
 
-        var asteroidPos = new Vector2(_random.Next(50, 400), _random.Next(50, 400));
-        var asteroidRot = _random.Next(0, 40);
-
-        var obj = new Asteroid(_texture, asteroidPos, new Vector2(128, 128), asteroidRot);
-        obj.Speed = 30f;
-        _asteroidList.Add(obj);
+        for (int i = 0; i < 4; i++) {
+            var asteroidPos = new Vector2(_random.Next(0, Globals.ScreenWidth), _random.Next(0, Globals.ScreenHeight));
+            var asteroidRot = _random.Next(0, 40);
+            var obj = new Asteroid(_texture, asteroidPos, new Vector2(128, 128), asteroidRot);
+            obj.Speed = 30f;
+            _asteroidList.Add(obj);
+        }
     }
 
     public override void Update(GameTime gameTime)
@@ -139,16 +140,15 @@ public class GameScene : Scene
         _moveTimer += dt;
 
         if (_moveTimer >= 0.1f) {
-            // _canMove = true;
             _moveTimer = 0f;
         }
 
         if (ks.IsKeyDown(Keys.A)) {
-            _spaceship.Rotation -= 10 * dt; // _rotationSpeed * dt;
+            _spaceship.Rotation -= 10 * dt;
         }
 
         if (ks.IsKeyDown(Keys.D)) {
-            _spaceship.Rotation += 10 * dt; // _rotationSpeed * dt;
+            _spaceship.Rotation += 10 * dt;
         }
 
         var rotation = Vector2.Transform(Direction.Up, Matrix.CreateRotationZ(_spaceship.Rotation));
@@ -160,20 +160,19 @@ public class GameScene : Scene
             _spaceship.Velocity *= MathF.Pow(0.01f, dt);
         }
 
-        float speed = _spaceship.Velocity.Length();
-        if (speed > _maxVelocity) {
-            _spaceship.Velocity = _spaceship.Velocity / speed * _maxVelocity;
-        }
-
-        _spaceship.Update(gameTime);
-
-        _spaceship.Position += _spaceship.Velocity * dt;
-
         if (ks.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space)) {
             var bullet = new Bullet(_texture, _spaceship.Position, new Vector2(8, 8), _spaceship.Rotation);
             bullet.Speed = 650f;
             _bulletlist.Add(bullet);
         }
+
+        float speed = _spaceship.Velocity.Length();
+        if (speed > _maxVelocity) {
+            _spaceship.Velocity = _spaceship.Velocity / speed * _maxVelocity;
+        }
+        
+        _spaceship.Position += _spaceship.Velocity * dt;
+        _spaceship.Update(gameTime);
 
         foreach (var bl in _bulletlist) {
             bl.Update(gameTime);
@@ -182,29 +181,24 @@ public class GameScene : Scene
         foreach (var asteroid in _asteroidList) {
             asteroid.Update(gameTime);
 
+            if (!_spaceship.IsInvulnerable && asteroid.Bounds.Intersects(_spaceship.Bounds)) {
+                _spaceship.IsInvulnerable = true;
+
+                asteroid.ShouldBeDeleted = true;
+                asteroid.Health -= 1;
+                CreateChildAsteroids(asteroid);
+            }
+
             foreach (var bullet in _bulletlist) {
                 if (asteroid.ShouldBeDeleted || bullet.ShouldBeDeleted)
                     continue;
 
                 if (asteroid.Bounds.Intersects(bullet.Bounds)) {
-                    asteroid.ShouldBeDeleted = true;
                     bullet.ShouldBeDeleted = true;
-                    asteroid.Health -= 1;
 
-                    if (asteroid.Health > 0) {
-                        var rotationPlus = asteroid.Rotation + 10;
-                        var rotationMinus = asteroid.Rotation - 10;
-                        
-                        var obj = new Asteroid(_texture, asteroid.Position, asteroid.Size * 0.5f, rotationPlus);
-                        obj.Speed = asteroid.Speed * 1.5f;
-                        obj.Health = asteroid.Health;
-                        _asteroidsToAdd.Add(obj);
-                        
-                        var obj2 = new Asteroid(_texture, asteroid.Position, asteroid.Size * 0.5f, rotationMinus);
-                        obj2.Speed = asteroid.Speed * 1.5f;
-                        obj2.Health = asteroid.Health;
-                        _asteroidsToAdd.Add(obj2);
-                    }
+                    asteroid.ShouldBeDeleted = true;
+                    asteroid.Health -= 1;
+                    CreateChildAsteroids(asteroid);
                 }
             }
         }
@@ -225,15 +219,29 @@ public class GameScene : Scene
         _previousKeyboardState = ks;
     }
 
+    private void CreateChildAsteroids(Asteroid asteroid)
+    {
+        if (asteroid.Health > 0) {
+            var rotationPlus = asteroid.Rotation + 10;
+            var rotationMinus = asteroid.Rotation - 10;
+
+            var obj = new Asteroid(_texture, asteroid.Position, asteroid.Size * 0.5f, rotationPlus);
+            obj.Speed = asteroid.Speed * 1.5f;
+            obj.Health = asteroid.Health;
+            _asteroidsToAdd.Add(obj);
+
+            var obj2 = new Asteroid(_texture, asteroid.Position, asteroid.Size * 0.5f, rotationMinus);
+            obj2.Speed = asteroid.Speed * 1.5f;
+            obj2.Health = asteroid.Health;
+            _asteroidsToAdd.Add(obj2);
+        }
+    }
+
     public override void Draw(GameTime gameTime)
     {
         SpriteBatch.Begin();
 
         _spaceship.Draw(SpriteBatch);
-
-        // Debug lines
-        // SpriteBatch.Draw(_texture, new Rectangle(Globals.ScreenWidth / 2, 0, 1, Globals.ScreenHeight), Color.Green);
-        // SpriteBatch.Draw(_texture, new Rectangle(0, Globals.ScreenHeight / 2, Globals.ScreenWidth, 1), Color.Green);
 
         foreach (var bl in _bulletlist) {
             bl.Draw(SpriteBatch);
@@ -261,9 +269,4 @@ public class GameScene : Scene
 
         SpriteBatch.End();
     }
-
-    // private int GetNextGap()
-    // {
-    //     return _random.Next(2, 7);
-    // }
 }
