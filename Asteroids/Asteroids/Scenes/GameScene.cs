@@ -186,6 +186,10 @@ public class GameScene : Scene
 
                 asteroid.ShouldBeDeleted = true;
                 asteroid.Health -= 1;
+                if (asteroid.Health == 0) {
+                    _score += 100;
+                    _scoreText.Value = _score.ToString();
+                }
                 CreateChildAsteroids(asteroid);
             }
 
@@ -198,6 +202,10 @@ public class GameScene : Scene
 
                     asteroid.ShouldBeDeleted = true;
                     asteroid.Health -= 1;
+                    if (asteroid.Health == 0) {
+                        _score += 100;
+                        _scoreText.Value = _score.ToString();
+                    }
                     CreateChildAsteroids(asteroid);
                 }
             }
@@ -212,7 +220,7 @@ public class GameScene : Scene
         _asteroidList.RemoveAll(bl => bl.ShouldBeDeleted);
 
         if (_asteroidList.Count == 0) {
-            _isGameOver = true;
+            _youWon = true;
             _isPause = true;
         }
 
@@ -257,7 +265,6 @@ public class GameScene : Scene
             _gameOverText.Draw(SpriteBatch);
             _restartButton.Draw(SpriteBatch);
         }
-
 
         if (_youWon) {
             _panel.Draw(SpriteBatch);
