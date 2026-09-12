@@ -190,13 +190,12 @@ public class GameScene : Scene
 
                 asteroid.ShouldBeDeleted = true;
                 asteroid.Health -= 1;
-                if (asteroid.Health == 0) {
-                    _score += 100;
-                    _scoreText.Value = _score.ToString();
-                }
+                _score += _scores[asteroid.Health];
+                _scoreText.Value = _score.ToString();
                 CreateChildAsteroids(asteroid);
 
                 lifes -= 1;
+                continue;
             }
 
             foreach (var bullet in _bulletlist) {
