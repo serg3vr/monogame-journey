@@ -16,6 +16,7 @@ public class GameScene : Scene
 {
     private static readonly Random _random = new();
     private float _usableScreenWidth;
+    private const int TOTAL_ASTEROIDS = 1;
 
     private Texture2D _texture;
     private SpriteFont _smallFont;
@@ -45,6 +46,8 @@ public class GameScene : Scene
     private List<Bullet> _bulletlist;
     private List<Asteroid> _asteroidList;
     private List<Asteroid> _asteroidsToAdd;
+
+    private int[] _scores = [100, 50, 20];
 
     public GameScene(
         ContentManager contentManager,
@@ -107,7 +110,7 @@ public class GameScene : Scene
         _scoreText.Scale = Vector2.One * scale;
         _scoreText.Value = _score.ToString();
 
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < TOTAL_ASTEROIDS; i++) {
             var asteroidPos = new Vector2(_random.Next(0, Globals.ScreenWidth), _random.Next(0, Globals.ScreenHeight));
             var asteroidRot = _random.Next(0, 40);
             var obj = new Asteroid(_texture, asteroidPos, new Vector2(128, 128), asteroidRot);
@@ -202,10 +205,8 @@ public class GameScene : Scene
 
                     asteroid.ShouldBeDeleted = true;
                     asteroid.Health -= 1;
-                    if (asteroid.Health == 0) {
-                        _score += 100;
-                        _scoreText.Value = _score.ToString();
-                    }
+                    _score += _scores[asteroid.Health];
+                    _scoreText.Value = _score.ToString();
                     CreateChildAsteroids(asteroid);
                 }
             }
