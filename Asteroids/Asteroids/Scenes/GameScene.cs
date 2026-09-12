@@ -48,6 +48,7 @@ public class GameScene : Scene
     private List<Asteroid> _asteroidsToAdd;
 
     private int[] _scores = [100, 50, 20];
+    private int lifes = 3;
 
     public GameScene(
         ContentManager contentManager,
@@ -194,6 +195,8 @@ public class GameScene : Scene
                     _scoreText.Value = _score.ToString();
                 }
                 CreateChildAsteroids(asteroid);
+
+                lifes -= 1;
             }
 
             foreach (var bullet in _bulletlist) {
@@ -220,9 +223,14 @@ public class GameScene : Scene
         _bulletlist.RemoveAll(bl => bl.ShouldBeDeleted);
         _asteroidList.RemoveAll(bl => bl.ShouldBeDeleted);
 
-        if (_asteroidList.Count == 0) {
-            _youWon = true;
+        if (lifes == 0) {
             _isPause = true;
+            _isGameOver = true;
+        }
+
+        if (_asteroidList.Count == 0) {
+            _isPause = true;
+            _youWon = true;
         }
 
         _previousKeyboardState = ks;
