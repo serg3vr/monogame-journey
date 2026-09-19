@@ -61,7 +61,7 @@ public class GameScene : Scene
 
     public override void Initialize()
     {
-        _usableScreenWidth = Globals.ScreenWidth / 4f;
+        _usableScreenWidth = Globals.ScreenWidth / 6f;
 
         _isPause = false;
         _isGameOver = false;
@@ -82,7 +82,7 @@ public class GameScene : Scene
         _smallFont = ContentManager.Load<SpriteFont>("fonts/small");
         _mediumFont = ContentManager.Load<SpriteFont>("fonts/medium");
 
-        _panel = new Panel(_texture, _smallFont, new Rectangle((int)_usableScreenWidth, 32, (int)_usableScreenWidth * 2, (int)_usableScreenWidth * 2));
+        _panel = new Panel(_texture, _smallFont, new Rectangle((int)_usableScreenWidth, 32, (int)_usableScreenWidth * 4, (int)_usableScreenWidth * 2));
         _restartButton = new Button(_texture, _mediumFont, new Rectangle(Globals.ScreenWidth / 2 - 140 / 2, 240, 140, 60), "Restart");
 
         var scale = 2;
@@ -107,7 +107,7 @@ public class GameScene : Scene
         _spaceship = new Spaceship(_texture, center, size);
         _spaceship.SpriteColor = Color.White;
 
-        _scoreText = new Text(_mediumFont, new Vector2(Globals.ScreenWidth / 2, 100));
+        _scoreText = new Text(_smallFont, new Vector2(32, 32));
         _scoreText.Scale = Vector2.One * scale;
         _scoreText.Value = _score.ToString();
 
@@ -265,12 +265,7 @@ public class GameScene : Scene
 
         foreach (var al in _asteroidList) {
             al.Draw(SpriteBatch);
-            SpriteBatch.DrawString(_smallFont, $"HP: {al.Health}", new Vector2(al.Bounds.Left, al.Bounds.Top), Color.Red);
-        }
-
-        for (int i = 0; i < 3; i++) {
-            var bounds = new Rectangle(32 + 40 * i, 32, _spaceship.Bounds.Width, _spaceship.Bounds.Height);
-            SpriteBatch.Draw(_texture, bounds, Color.White);
+            // SpriteBatch.DrawString(_smallFont, $"HP: {al.Health}", new Vector2(al.Bounds.Left, al.Bounds.Top), Color.Red);
         }
 
         if (_isGameOver) {
@@ -286,6 +281,11 @@ public class GameScene : Scene
         }
 
         _scoreText.Draw(SpriteBatch);
+
+        for (int i = 0; i < lifes; i++) {
+            var bounds = new Rectangle(32 + 40 * i, 72, _spaceship.Bounds.Width, _spaceship.Bounds.Height);
+            SpriteBatch.Draw(_texture, bounds, Color.White);
+        }
 
         SpriteBatch.End();
     }

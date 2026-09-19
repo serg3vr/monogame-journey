@@ -26,7 +26,7 @@ public class Text
             _font, 
             Value, 
             Position, 
-            Color.Red, 
+            Color.White, 
             0f, 
             Vector2.Zero, 
             Scale, 
