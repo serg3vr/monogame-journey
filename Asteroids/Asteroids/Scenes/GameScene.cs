@@ -174,7 +174,7 @@ public class GameScene : Scene
         if (speed > _maxVelocity) {
             _spaceship.Velocity = _spaceship.Velocity / speed * _maxVelocity;
         }
-        
+
         _spaceship.Position += _spaceship.Velocity * dt;
         _spaceship.Update(gameTime);
 
@@ -266,6 +266,11 @@ public class GameScene : Scene
         foreach (var al in _asteroidList) {
             al.Draw(SpriteBatch);
             SpriteBatch.DrawString(_smallFont, $"HP: {al.Health}", new Vector2(al.Bounds.Left, al.Bounds.Top), Color.Red);
+        }
+
+        for (int i = 0; i < 3; i++) {
+            var bounds = new Rectangle(32 + 40 * i, 32, _spaceship.Bounds.Width, _spaceship.Bounds.Height);
+            SpriteBatch.Draw(_texture, bounds, Color.White);
         }
 
         if (_isGameOver) {
