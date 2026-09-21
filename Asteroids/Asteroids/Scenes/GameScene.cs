@@ -127,17 +127,6 @@ public class GameScene : Scene
 
         if (_isGameOver || _youWon) {
             _restartButton.Update();
-        }
-
-        if (_isPause || _youWon) {
-            if (!_isGameOver) {
-                _timerToUnpause -= dt;
-
-                if (_timerToUnpause <= 0) {
-                    _isPause = false;
-                }
-            }
-
             return;
         }
 
