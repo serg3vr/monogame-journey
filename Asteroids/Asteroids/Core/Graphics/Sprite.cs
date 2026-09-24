@@ -19,6 +19,23 @@ public class Sprite
     public Color SpriteColor { get; set; } = Color.White;
     public Rectangle Bounds => new((int)Position.X, (int)Position.Y, (int)Size.X, (int)Size.Y);
 
+    public void DrawRotated(SpriteBatch spriteBatch)
+    {
+        var center = Position + Size * 0.5f;
+        var scale = new Vector2(Size.X / Texture.Width, Size.Y / Texture.Height);
+        spriteBatch.Draw(
+            Texture,
+            center,
+            null,
+            SpriteColor,
+            Rotation,
+            new Vector2(Texture.Width / 2f, Texture.Height / 2f),
+            scale,
+            SpriteEffects.None,
+            0f
+        );
+    }
+
     public Sprite(Texture2D texture, Vector2 position, Vector2 size)
     {
         Texture = texture;

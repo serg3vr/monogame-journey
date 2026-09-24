@@ -16,7 +16,7 @@ public class GameScene : Scene
 {
     private static readonly Random _random = new();
     private float _usableScreenWidth;
-    private const int TOTAL_ASTEROIDS = 1;
+    private const int TOTAL_ASTEROIDS = 4;
     private const float MIN_ASTEROID_SIZE = 32f;
 
     private static int ScoreForSize(float size) => size switch {

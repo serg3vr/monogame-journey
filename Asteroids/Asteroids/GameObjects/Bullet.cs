@@ -36,6 +36,6 @@ public class Bullet : Sprite
     public override void Draw(SpriteBatch spriteBatch)
     {
         spriteBatch.Draw(Texture, new Rectangle(Bounds.X + 2, Bounds.Y + 2, Bounds.Width - 4, Bounds.Height - 4), SpriteColor);
-        base.DrawDebug(spriteBatch);
+        // base.DrawDebug(spriteBatch);
     }
 }

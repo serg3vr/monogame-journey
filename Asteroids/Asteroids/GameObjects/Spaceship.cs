@@ -57,8 +57,8 @@ public class Spaceship : Sprite
     public override void Draw(SpriteBatch spriteBatch)
     {
         if (_isVisible) {
-            spriteBatch.Draw(Texture, Bounds, null, SpriteColor, Rotation, new Vector2(0.5f, 0.5f), SpriteEffects.None, 0f);
+            DrawRotated(spriteBatch);
         }
-        base.DrawDebug(spriteBatch);
+        // base.DrawDebug(spriteBatch);
     }
 }

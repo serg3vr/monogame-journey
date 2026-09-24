@@ -48,7 +48,7 @@ public class Asteroid : Sprite
 
     public override void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(Texture, Bounds, null, SpriteColor, Rotation, new Vector2(0.5f, 0.5f), SpriteEffects.None, 0f);
-        base.DrawDebug(spriteBatch);
+        DrawRotated(spriteBatch);
+        // base.DrawDebug(spriteBatch);
     }
 }
