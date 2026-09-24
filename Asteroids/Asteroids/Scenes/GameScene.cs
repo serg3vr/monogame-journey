@@ -17,6 +17,19 @@ public class GameScene : Scene
     private static readonly Random _random = new();
     private float _usableScreenWidth;
     private const int TOTAL_ASTEROIDS = 1;
+    private const float MIN_ASTEROID_SIZE = 32f;
+
+    private static int ScoreForSize(float size) => size switch {
+        >= 128 => 20,
+        >= 64 => 50,
+        _ => 100,
+    };
+
+    private static int HealthForSize(float size) => size switch {
+        >= 128 => 3,
+        >= 64 => 2,
+        _ => 1,
+    };
 
     private Texture2D _texture;
     private SpriteFont _smallFont;
@@ -47,7 +60,6 @@ public class GameScene : Scene
     private List<Asteroid> _asteroidList;
     private List<Asteroid> _asteroidsToAdd;
 
-    private int[] _scores = [100, 50, 20];
     private int lifes = 3;
 
     public GameScene(
@@ -179,7 +191,7 @@ public class GameScene : Scene
 
                 asteroid.ShouldBeDeleted = true;
                 asteroid.Health -= 1;
-                _score += _scores[asteroid.Health];
+                _score += ScoreForSize(asteroid.Size.X);
                 _scoreText.Value = _score.ToString();
                 CreateChildAsteroids(asteroid);
 
@@ -196,7 +208,7 @@ public class GameScene : Scene
 
                     asteroid.ShouldBeDeleted = true;
                     asteroid.Health -= 1;
-                    _score += _scores[asteroid.Health];
+                    _score += ScoreForSize(asteroid.Size.X);
                     _scoreText.Value = _score.ToString();
                     CreateChildAsteroids(asteroid);
                 }
@@ -226,18 +238,19 @@ public class GameScene : Scene
 
     private void CreateChildAsteroids(Asteroid asteroid)
     {
-        if (asteroid.Health > 0) {
+        var childSize = asteroid.Size * 0.5f;
+        if (childSize.X >= MIN_ASTEROID_SIZE) {
             var rotationPlus = asteroid.Rotation + 10;
             var rotationMinus = asteroid.Rotation - 10;
 
-            var obj = new Asteroid(_texture, asteroid.Position, asteroid.Size * 0.5f, rotationPlus);
+            var obj = new Asteroid(_texture, asteroid.Position, childSize, rotationPlus);
             obj.Speed = asteroid.Speed * 1.5f;
-            obj.Health = asteroid.Health;
+            obj.Health = HealthForSize(childSize.X);
             _asteroidsToAdd.Add(obj);
 
-            var obj2 = new Asteroid(_texture, asteroid.Position, asteroid.Size * 0.5f, rotationMinus);
+            var obj2 = new Asteroid(_texture, asteroid.Position, childSize, rotationMinus);
             obj2.Speed = asteroid.Speed * 1.5f;
-            obj2.Health = asteroid.Health;
+            obj2.Health = HealthForSize(childSize.X);
             _asteroidsToAdd.Add(obj2);
         }
     }
