@@ -16,7 +16,7 @@ public class GameScene : Scene
 {
     private static readonly Random _random = new();
     private float _usableScreenWidth;
-    private const int TOTAL_ASTEROIDS = 4;
+    private const int TOTAL_ASTEROIDS = 1;
     private const float MIN_ASTEROID_SIZE = 32f;
 
     private static int ScoreForSize(float size) => size switch {
@@ -35,7 +35,6 @@ public class GameScene : Scene
     private SpriteFont _smallFont;
 
     private bool _isPause;
-    private float _timerToUnpause;
     private bool _isGameOver;
     private bool _youWon;
 
@@ -57,6 +56,7 @@ public class GameScene : Scene
     private static readonly float _maxVelocity = 150f;
 
     private List<Bullet> _bulletlist;
+    private Vector2 _bulletSpawnPos;
     private List<Asteroid> _asteroidList;
     private List<Asteroid> _asteroidsToAdd;
 
@@ -156,17 +156,20 @@ public class GameScene : Scene
             _spaceship.Rotation += 10 * dt;
         }
 
-        var rotation = Vector2.Transform(Direction.Up, Matrix.CreateRotationZ(_spaceship.Rotation));
+        var forwardDirection = Vector2.Transform(Direction.Up, Matrix.CreateRotationZ(_spaceship.Rotation));
+
+        var center = (_spaceship.Position - new Vector2(4, 4)) + _spaceship.Size * 0.5f;
+        _bulletSpawnPos = center + forwardDirection * (_spaceship.Size.Y * 0.5f);
 
         if (ks.IsKeyDown(Keys.W)) {
-            _spaceship.Acceleration = rotation * _accelerationForce;
+            _spaceship.Acceleration = forwardDirection * _accelerationForce;
             _spaceship.Velocity += _spaceship.Acceleration * dt;
         } else {
             _spaceship.Velocity *= MathF.Pow(0.01f, dt);
         }
 
         if (ks.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space)) {
-            var bullet = new Bullet(_texture, _spaceship.Position, new Vector2(8, 8), _spaceship.Rotation);
+            var bullet = new Bullet(_texture, _bulletSpawnPos, new Vector2(8, 8), _spaceship.Rotation);
             bullet.Speed = 650f;
             _bulletlist.Add(bullet);
         }
